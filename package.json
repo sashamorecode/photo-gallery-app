@@ -27,6 +27,7 @@
 	},
 	"dependencies": {
 		"@auth/sveltekit": "^1.10.0",
+		"@sveltejs/adapter-vercel": "^5.9.0",
 		"better-sqlite3": "^12.2.0"
 	}
 }
