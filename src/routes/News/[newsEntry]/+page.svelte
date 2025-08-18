@@ -11,6 +11,8 @@
     let showCarousel = $state(false);
     let carouselIndex = $state(0);
 
+    let image = $state();
+
     function openCarousel(idx) {
         carouselIndex = idx;
         showCarousel = true;
@@ -100,6 +102,7 @@
                 style="height: 90%;"
                 class="bg-transparent size-full flex items-center"
             >
+                <div class="mx-auto z-10 bg-stone-300 backdrop-blur-lg bg-opacity-20 backdrop-saturate-100 backdrop-contrast-100 mt-auto mb-10 px-3 py-1 rounded-lg text-3xl font-stretch-110%">{thisEntry.images[carouselIndex].title}</div>
                 <Controls />
                 <CarouselIndicators />
             </Carousel>
