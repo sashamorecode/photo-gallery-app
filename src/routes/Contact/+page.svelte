@@ -3,14 +3,14 @@
 </script>
 
 <Navbar />
-<div class="w-full h-full">
+<div class="w-full h-full lg:my-32">
     <h1 class="text-4xl font-cabin font-[400] pl-12 pt-3 pb-4 lg:hidden">
         Contact
     </h1>
     <div
         class="overflow-scroll p-4 max-w-lg m-auto lg:fixed lg:p-8 lg:w-full lg:ml-[25vw]"
     >
-        <h1 class="text-4xl mb:text-3xl text-center font-[300]">Message Me</h1>
+        <h1 class="text-4xl mb:text-3xl text-center font-[300] pb-4">Message Me</h1>
         <form class="space-y-6 p-4">
             <div>
                 <label for="name" class="block text-sm font-medium mb-1"

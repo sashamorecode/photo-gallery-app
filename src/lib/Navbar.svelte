@@ -67,11 +67,8 @@
             </div>
         </div>
         <div class="flex space-x-2 ml-3 lg:block hidden">
-            <a href="instagram.com" class="hover:text-gray-300 transition">
+            <a href="https://www.instagram.com/jonasschledorn" target="_blank" class="hover:text-gray-300 transition">
                 <i class="fab fa-instagram text-xl"></i>
-            </a>
-            <a href="twitter.com" class="hover:text-gray-300 transition">
-                <i class="fab fa-twitter text-xl"></i>
             </a>
         </div>
     </div>
