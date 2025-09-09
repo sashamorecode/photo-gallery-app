@@ -1,7 +1,7 @@
 <script>
     import Navbar from "$lib/Navbar.svelte";
     let { data } = $props();
-    let printListings = data.prints;
+    let printListings = $state(data.prints);
     console.log(printListings);
     printListings = [
         ...printListings,
@@ -46,7 +46,7 @@
             ],
         },
     ];
-    let currentPrint = $state(printListings[0]);
+    let currentPrint = $derived(printListings[0]);
     let buyPageOpen = $state(false);
     function onClickListing(event) {
         currentPrint = printListings[this.id];
@@ -67,7 +67,7 @@
         {#each printListings as { src, title }, idx}
             <div
                 class="print-item cursor-pointer group"
-                id={idx}
+                id={idx.toString()}
                 onclick={onClickListing}
             >
                 <img
