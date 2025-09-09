@@ -8,11 +8,17 @@ const db = new Database('./mydb.sqlite', {});
 // === Set up tables (run once, or use migrations in production) ===
 
 db.exec(`
+CREATE TABLE IF NOT EXISTS homepage_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    src TEXT
+);
+
 CREATE TABLE IF NOT EXISTS stories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cover TEXT,
     title TEXT
 );
+
 CREATE TABLE IF NOT EXISTS story_images (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     story_id INTEGER,
@@ -53,6 +59,19 @@ CREATE TABLE IF NOT EXISTS print_sizes (
     FOREIGN KEY (print_id) REFERENCES prints(id) ON DELETE CASCADE
 );
 `);
+//curd for homepage
+export function getHomepage() {
+    const homepage_images = db.prepare('SELECT * FROM homepage_images').all();
+    return homepage_images;
+}
+export function updateHompage(images) {
+    db.prepare('DELETE FROM homepage_images').run();
+    const imagesStmt = db.prepare('INSERT INTO homepage_images (src) VALUES (?)');
+    for (const img of images) {
+        imagesStmt.run(img.src);
+    }
+}
+
 
 // ---------- CRUD for STORIES ----------
 export function createStory(story) {
