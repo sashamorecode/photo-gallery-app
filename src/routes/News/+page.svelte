@@ -3,7 +3,6 @@
     import NewsEntry from "$lib/NewsEntry.svelte";
     let { data } = $props();
     const entries = data.news;
-    console.log(entries)
 </script>
 
 <Navbar />
