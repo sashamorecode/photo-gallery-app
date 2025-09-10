@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS homepage_images (
 
 CREATE TABLE IF NOT EXISTS stories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cover TEXT,
+    url TEXT,
+    coverImage TEXT,
     title TEXT
 );
 
@@ -23,7 +24,8 @@ CREATE TABLE IF NOT EXISTS story_images (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     story_id INTEGER,
     src TEXT,
-    caption TEXT,
+    alt TEXT,
+    title TEXT,
     FOREIGN KEY (story_id) REFERENCES stories(id) ON DELETE CASCADE
 );
 
@@ -63,8 +65,7 @@ CREATE TABLE IF NOT EXISTS print_sizes (
 export function getHomepage() {
     const homepage_images = db.prepare('SELECT * FROM homepage_images').all();
     return homepage_images;
-}
-export function updateHompage(images) {
+} export function updateHompage(images) {
     db.prepare('DELETE FROM homepage_images').run();
     const imagesStmt = db.prepare('INSERT INTO homepage_images (src) VALUES (?)');
     for (const img of images) {
@@ -75,27 +76,27 @@ export function updateHompage(images) {
 
 // ---------- CRUD for STORIES ----------
 export function createStory(story) {
-    const stmt = db.prepare('INSERT INTO stories (cover, title) VALUES (?, ?)');
-    const result = stmt.run(story.cover, story.title);
-    const imagesStmt = db.prepare('INSERT INTO story_images (story_id, src, caption) VALUES (?, ?, ?)');
+    const stmt = db.prepare('INSERT INTO stories (url, coverImage, title) VALUES (?, ?, ?)');
+    const result = stmt.run(story.url, story.coverImage, story.title);
+    const imagesStmt = db.prepare('INSERT INTO story_images (story_id, src, alt, title) VALUES (?, ?, ?, ?)');
     for (const img of story.images) {
-        imagesStmt.run(result.lastInsertRowid, img.src, img.caption);
+        imagesStmt.run(result.lastInsertRowid, img.src, img.alt, img.title);
     }
     return result.lastInsertRowid;
 }
 export function getStories() {
     const stories = db.prepare('SELECT * FROM stories').all();
     for (const story of stories) {
-        story.images = db.prepare('SELECT src, caption FROM story_images WHERE story_id = ?').all(story.id);
+        story.images = db.prepare('SELECT src, alt, title FROM story_images WHERE story_id = ?').all(story.id);
     }
     return stories;
 }
 export function updateStory(id, story) {
-    db.prepare('UPDATE stories SET cover=?, title=? WHERE id=?').run(story.cover, story.title, id);
+    db.prepare('UPDATE stories SET coverImage=?, title=? WHERE id=?').run(story.coverImage, story.title, id);
     db.prepare('DELETE FROM story_images WHERE story_id=?').run(id);
-    const imagesStmt = db.prepare('INSERT INTO story_images (story_id, src, caption) VALUES (?, ?, ?)');
+    const imagesStmt = db.prepare('INSERT INTO story_images (story_id, src, alt, title) VALUES (?, ?, ?, ?)');
     for (const img of story.images) {
-        imagesStmt.run(id, img.src, img.caption);
+        imagesStmt.run(id, img.src, img.alt, img.title);
     }
 }
 export function deleteStory(id) {

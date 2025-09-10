@@ -2,6 +2,7 @@
     import Navbar from "$lib/Navbar.svelte";
     let { data } = $props();
     let storys = data.stories;
+    console.log(storys)
 </script>
 
 <Navbar />
@@ -13,19 +14,17 @@
     </h1>
     <div class="pt-20 lg:pt-4 grid grid-cols-1 gap-6 p-4">
         <!-- Story Items -->
-        {#each storys as { cover, title, url }}
+        {#each storys as { coverImage, title, url }}
             <a href="/Stories/{url}">
                 <div class="story-item cursor-pointer group" data-story="1">
                     <img
-                        src={cover}
+                        src={coverImage}
                         alt={title}
                         class="w-3/4 m-auto object-cover rounded-lg transition-transform lg:group-hover:scale-[101%]"
                     />
                     <h3
                         class="mt-4 text-xl text-center group-hover:text-red-800"
-                    >
-                        {title}
-                    </h3>
+                    ></h3>
                 </div>
             </a>
         {/each}
