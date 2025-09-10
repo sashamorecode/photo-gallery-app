@@ -2,47 +2,6 @@
     import Navbar from "$lib/Navbar.svelte";
     let { data } = $props();
     let storys = data.stories;
-    storys = [
-        ...storys,
-        {
-            url: "story1",
-            cover: "/s1-1.jpg",
-            title: "Story 1",
-            images: [
-                {
-                    src: "/s1-1.jpg",
-                    caption: "Image Caption",
-                },
-                {
-                    src: "/s1-2.jpg",
-                    caption: "Image Caption",
-                },
-                {
-                    src: "/s1-3.jpg",
-                    caption: "Image Caption",
-                },
-            ],
-        },
-        {
-            url: "story2",
-            cover: "/s2-1.jpg",
-            title: "Story 1",
-            images: [
-                {
-                    src: "/s2-1.jpg",
-                    caption: "Image Caption",
-                },
-                {
-                    src: "/s2-2.jpg",
-                    caption: "Image Caption",
-                },
-                {
-                    src: "/s2-3.jpg",
-                    caption: "Image Caption",
-                },
-            ],
-        },
-    ];
 </script>
 
 <Navbar />

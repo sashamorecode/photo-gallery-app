@@ -2,50 +2,6 @@
     import Navbar from "$lib/Navbar.svelte";
     let { data } = $props();
     let printListings = $state(data.prints);
-    console.log(printListings);
-    printListings = [
-        ...printListings,
-        {
-            src: "/n1-1.jpg",
-            title: "Print 1",
-            description: "Replace this text with description of print",
-            sizes: [
-                { size: "20cmx20cm", price: "10" },
-                { size: "40cmx40cm", price: "15" },
-                { size: "100cmx100cm", price: "20" },
-            ],
-        },
-        {
-            src: "/n2-1.jpg",
-            title: "Print 2",
-            description: "Replace this text with description of print",
-            sizes: [
-                { size: "20cmx20cm", price: "10" },
-                { size: "40cmx40cm", price: "15" },
-                { size: "100cmx100cm", price: "20" },
-            ],
-        },
-        {
-            src: "/n2-2.jpg",
-            title: "Print 3",
-            description: "Replace this text with description of print",
-            sizes: [
-                { size: "20cmx20cm", price: "10" },
-                { size: "40cmx40cm", price: "15" },
-                { size: "100cmx100cm", price: "20" },
-            ],
-        },
-        {
-            src: "/n2-3.jpg",
-            title: "Print 4",
-            description: "Replace this text with description of print",
-            sizes: [
-                { size: "20cmx20cm", price: "10" },
-                { size: "40cmx40cm", price: "15" },
-                { size: "100cmx100cm", price: "20" },
-            ],
-        },
-    ];
     let currentPrint = $derived(printListings[0]);
     let buyPageOpen = $state(false);
     function onClickListing(event) {
