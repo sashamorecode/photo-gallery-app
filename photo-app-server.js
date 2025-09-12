@@ -5,7 +5,7 @@ const cert = fs.readFileSync('/etc/letsencrypt/live/jonasschledorn.com/fullchain
 const key = fs.readFileSync('/etc/letsencrypt/live/jonasschledorn.com/privkey.pem');
 
 https.createServer({ key, cert }, handler)
-  .listen(300, () => {
+  .listen(3000, () => {
     console.log('HTTPS server running on port 443');
   });
 
