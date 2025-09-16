@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS print_sizes (
 export function getHomepage() {
     const homepage_images = db.prepare('SELECT * FROM homepage_images').all();
     return homepage_images;
-} export function updateHompage(images) {
+} export function updateHompage(images ) {
     db.prepare('DELETE FROM homepage_images').run();
     const imagesStmt = db.prepare('INSERT INTO homepage_images (src) VALUES (?)');
     for (const img of images) {

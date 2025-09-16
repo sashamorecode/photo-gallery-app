@@ -29,8 +29,11 @@
 	},
 	"dependencies": {
 		"@auth/sveltekit": "^1.10.0",
+		"@mailerlite/mailerlite-nodejs": "^1.5.0",
 		"@sveltejs/adapter-node": "^5.3.1",
 		"@vitejs/plugin-basic-ssl": "^2.1.0",
-		"better-sqlite3": "^12.2.0"
+		"better-sqlite3": "^12.2.0",
+		"nodemailer": "^6.10.1",
+		"svelte-email": "^0.0.4"
 	}
 }
