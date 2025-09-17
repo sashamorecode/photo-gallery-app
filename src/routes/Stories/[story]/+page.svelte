@@ -4,47 +4,6 @@
     import { Carousel, Controls, CarouselIndicators } from "flowbite-svelte";
     let { data } = $props();
     let storys = data.stories;
-    storys = [
-        ...storys,
-        {
-            url: "story1",
-            cover: "/s1-1.jpg",
-            title: "Story 1",
-            images: [
-                {
-                    src: "/s1-1.jpg",
-                    caption: "Image Caption",
-                },
-                {
-                    src: "/s1-2.jpg",
-                    caption: "Image Caption",
-                },
-                {
-                    src: "/s1-3.jpg",
-                    caption: "Image Caption",
-                },
-            ],
-        },
-        {
-            url: "story2",
-            cover: "/s2-1.jpg",
-            title: "Story 1",
-            images: [
-                {
-                    src: "/s2-1.jpg",
-                    caption: "Image Caption",
-                },
-                {
-                    src: "/s2-2.jpg",
-                    caption: "Image Caption",
-                },
-                {
-                    src: "/s2-3.jpg",
-                    caption: "Image Caption",
-                },
-            ],
-        },
-    ];
 
     let entryUrl = $page.params.story;
     console.log(entryUrl);
@@ -68,7 +27,7 @@
 </script>
 
 <Navbar />
-<div class="w-full h-full overflow-y-auto lg:p-4">
+<div class="w-full h-full overflow-y-auto lg:overflow-y-clip lg:p-4">
     <h1
         class="text-4xl font-cabin font-[400] pl-12 pt-3 w-full bg-black pb-4 lg:hidden"
     >
