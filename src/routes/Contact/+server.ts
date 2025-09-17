@@ -16,6 +16,7 @@ export async function POST({ request }) {
         },
     });
     const res = await sendMail(
+        "Contact Me Form <conact-form@jonasschledorn.com>",
         "sashasalzweir@gmail.com",
         "Contact Request from: " + jsonData.name,
         mail.html,

@@ -15,9 +15,9 @@ export function setupMailer(user, pass) {
 }
 
 // Wrap in an async IIFE so we can use await.
-export function sendMail(to, subject, html) {
+export function sendMail(from, to, subject, html) {
     return mailer.sendMail({
-        from: '"Photo Gallery Site" <jonasschledorn-gallery@test-y7zpl98q8p545vx6.mlsender.net>',
+        from: from,
         to: to,
         subject: subject,
         text: "",
