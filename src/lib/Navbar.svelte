@@ -1,4 +1,5 @@
 <script>
+    import { page } from "$app/state";
     function openMobileMenu() {
         const navContent = document.getElementById("nav-content");
         navContent.classList.toggle("hidden");
@@ -6,6 +7,8 @@
         icon.classList.toggle("fa-bars");
         icon.classList.toggle("fa-times");
     }
+
+    var links = ["Bio", "News", "Stories", "Prints", "Contact"];
 </script>
 
 <!-- Mobile menu button (hidden on desktop) -->
@@ -40,34 +43,30 @@
                         class="lg:hidden text-red-800 hover:text-red-800 transition"
                         >Home</a
                     >
-                    <a
-                        href="/Bio"
-                        class="text-base hover:text-red-800 transition">Bio</a
-                    >
-                    <a
-                        href="/News"
-                        class="text-base hover:text-red-800 transition">News</a
-                    >
-                    <a
-                        href="/Stories"
-                        class="text-base hover:text-red-800 transition"
-                        >Stories</a
-                    >
-                    <a
-                        href="/Prints"
-                        class="text-base hover:text-red-800 transition"
-                        >Prints</a
-                    >
-                    <a
-                        href="/Contact"
-                        class="text-base hover:text-red-800 transition"
-                        >Contact</a
-                    >
+                    {#each links as link}
+                        {#if link[1] === page.url.pathname[2]}
+                            <a
+                                href={"/" + link}
+                                class="text-base font-semibold hover:text-red-800 transition"
+                                >{link}</a
+                            >
+                        {:else}
+                            <a
+                                href={"/" + link}
+                                class="text-base hover:text-red-800 hover:font-semibold transition"
+                                >{link}</a
+                            >
+                        {/if}
+                    {/each}
                 </nav>
             </div>
         </div>
         <div class="flex space-x-2 ml-3 lg:block hidden">
-            <a href="https://www.instagram.com/jonasschledorn" target="_blank" class="hover:text-gray-300 transition">
+            <a
+                href="https://www.instagram.com/jonasschledorn"
+                target="_blank"
+                class="hover:text-gray-300 transition"
+            >
                 <i class="fab fa-instagram text-xl"></i>
             </a>
         </div>

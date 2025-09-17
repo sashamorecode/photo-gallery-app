@@ -61,7 +61,7 @@
                         {/each}
                     </div>
                     <!-- Text Content -->
-                    <div class="lg:w-1/3 mt-6 lg:mt-0">
+                    <div class="lg:w-1/3 mt-6 lg:mt-0 pb-20 lg:pb-0">
                         <h2 id="detail-title" class="text-2xl font-cabin mb-4">
                             {thisEntry.title}
                         </h2>
