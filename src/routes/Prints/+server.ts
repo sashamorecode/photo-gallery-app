@@ -20,7 +20,7 @@ export async function POST({ request }) {
     const res = await sendMail(
         mailer,
         "New Print Request <print-shop@jonasschledorn.com>",
-        "sashasalzweir@gmail.com",
+        "jonasschledorn@web.de",
         "Request for print " + jsonData.title,
         mail.html,
     );
