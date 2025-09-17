@@ -1,5 +1,5 @@
 import { render } from "svelte/server";
-import Contact from "$lib/emails/Contact.svelte";
+import Printorder from "$lib/emails/Printorder.svelte";
 import { sendMail, setupMailer } from "$lib/server/mail.js";
 import { MAILPASS, MAILUSER } from "$env/static/private";
 import { json } from "@sveltejs/kit";
@@ -7,19 +7,21 @@ import { json } from "@sveltejs/kit";
 const mailer = setupMailer(MAILUSER, MAILPASS);
 export async function POST({ request }) {
     const jsonData = await request.json();
-    const mail = render(Contact, {
+    console.log(jsonData)
+    const mail = render(Printorder, {
         props: {
-            name: jsonData.name,
+            print: jsonData.print,
+            price: jsonData.price,
             email: jsonData.email,
-            phone: jsonData.phone,
+            address: jsonData.address,
             message: jsonData.message,
         },
     });
     const res = await sendMail(
         mailer,
-        "Contact Me Form <conact-form@jonasschledorn.com>",
+        "New Print Request <print-shop@jonasschledorn.com>",
         "sashasalzweir@gmail.com",
-        "Contact Request from: " + jsonData.name,
+        "Request for print " + jsonData.title,
         mail.html,
     );
     console.log(res);

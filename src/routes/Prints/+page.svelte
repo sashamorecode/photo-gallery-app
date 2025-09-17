@@ -3,9 +3,17 @@
     let { data } = $props();
     let printListings = $state(data.prints);
     let currentPrint = $derived(printListings[0]);
+    let email = $state("");
+    let address = $state("");
+    let message = $state("");
+    let currentPrice = $state("");
+    let currentSize = $state("");
     let buyPageOpen = $state(false);
+    let buyRequestOpen = $state(false);
+    let sentPrint = $state(false);
     function onClickListing(event) {
         currentPrint = printListings[this.id];
+        currentPrice = currentPrint.sizes[0].price;
         buyPageOpen = true;
     }
 </script>
@@ -39,7 +47,7 @@
         <!-- Add more print items as needed -->
     </div>
     {#if buyPageOpen}
-        <div id="print-sell-overlay" class="fixed inset-0 bg-black/80 z-50">
+        <div id="print-sell-overlay" class="fixed inset-0 bg-black/80 z-30">
             <div class="relative w-full h-full">
                 <button
                     id="close-print-info"
@@ -84,35 +92,123 @@
                             <select
                                 id="print-size-select"
                                 class="rounded font-bold bg-black/40 py-1 px-2 text-align-last"
-                                onchange={(item) => {
-                                    document.getElementById(
-                                        "print-price",
-                                    ).innerHTML =
-                                        item.target.selectedOptions[0].value +
-                                        " €";
-                                }}
+                                bind:value={currentPrice}
                             >
-                                {#each currentPrint.sizes as s}
-                                    <option id="size-opt" value={s.price}
-                                        >{s.size}</option
-                                    >
+                                {#each currentPrint.sizes as s, i}
+                                    {#if i == 0}
+                                        <option
+                                            id="size-opt"
+                                            selected
+                                            value={s.price}>{s.size}</option
+                                        >
+                                    {:else}
+                                        <option id="size-opt" value={s.price}
+                                            >{s.size}</option
+                                        >
+                                    {/if}
                                 {/each}
                             </select>
                         </div>
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-bold">Price:</span>
-                            <p id="print-price" class="text-lg font-bold">€</p>
+                            <p id="print-price" class="text-lg font-bold">
+                                {currentPrice}€
+                            </p>
                         </div>
                         <div class="flex justify-end">
                             <button
                                 id="print-request-button"
                                 class="bg-red-800 hover:bg-red-600 px-2 font-bold text-xl rounded w-full"
-                                >Request Print</button
+                                onclick={() => {
+                                    buyRequestOpen = true;
+                                }}>Request Print</button
                             >
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+        {#if buyRequestOpen}
+            <div id="print-sell-overlay" class="fixed inset-0 bg-black/70 z-50">
+                <button
+                    id="close-print-info"
+                    class="absolute top-6 right-6 text-white text-4xl p-4 z-50 hover:text-red-800 transition"
+                    onclick={() => {
+                        buyRequestOpen = false;
+                    }}
+                >
+                    &times;
+                </button>
+                <form
+                    onsubmit={(e) => {
+                        e.preventDefault();
+                        const res = fetch(`/Prints`, {
+                            method: "POST",
+                            headers: {
+                                Accept: "application/json",
+                                "Content-type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                print: currentPrint,
+                                price: currentPrice,
+                                email: email,
+                                address: address,
+                                message: message,
+                            }),
+                        });
+                        console.log(res);
+                        res.then((r) => {
+                            let jres = r.json();
+                            jres.then((jsonRes) => {
+                                if (jsonRes.success) {
+                                    buyPageOpen = false;
+                                    buyRequestOpen = false;
+                                    sentPrint = true;
+                                    setTimeout(() => {
+                                        sentPrint = false;
+                                    }, 5000);
+                                } else {
+                                    alert("Error Occurred");
+                                }
+                            });
+                        });
+                    }}
+                    class="bg-slate-800 flex flex-col p-3 rounded-lg mx-[40%] w-[25%] space-y-1 mt-[25vh]"
+                >
+                    <div class="text-2xl">Order Details</div>
+                    <label
+                        >Email:
+                        <input
+                            required
+                            type="email"
+                            id="email"
+                            bind:value={email}
+                        />
+                    </label>
+                    <label
+                        >Address:
+                        <input
+                            required
+                            type="text"
+                            id="address"
+                            bind:value={address}
+                        />
+                    </label>
+                    <label for="message">Message (optional): </label>
+                    <textarea id="message" bind:value={message}></textarea>
+                    <input
+                        type="submit"
+                        value="Send Order"
+                        class="bg-red-800 rounded-lg"
+                    />
+                </form>
+            </div>
+        {/if}
+    {/if}
+
+    {#if sentPrint}
+        <div class="mx-auto mt-4 bg-slate-500/70 p-6 text-center">
+            Order Sent.
         </div>
     {/if}
 </div>
