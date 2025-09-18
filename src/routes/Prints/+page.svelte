@@ -46,7 +46,7 @@
         {/each}
         <!-- Add more print items as needed -->
     </div>
-    {#if buyPageOpen}
+    {#if buyPageOpen || true}
         <div id="print-sell-overlay" class="fixed inset-0 bg-black/80 z-30">
             <div class="relative w-full h-full">
                 <button
@@ -128,7 +128,7 @@
                 </div>
             </div>
         </div>
-        {#if buyRequestOpen}
+        {#if buyRequestOpen || true}
             <div id="print-sell-overlay" class="fixed inset-0 bg-black/70 z-50">
                 <button
                     id="close-print-info"
@@ -173,7 +173,8 @@
                             });
                         });
                     }}
-                    class="bg-slate-800 flex flex-col p-3 rounded-lg mx-[40%] w-[25%] space-y-1 mt-[25vh]"
+                    class="bg-slate-800 flex flex-col p-3 rounded-lg mx-[10%] lg:mx-[35%] w-[80%]
+                    lg:w-[30%] space-y-1 mt-[25vh]"
                 >
                     <div class="text-2xl">Order Details</div>
                     <label
