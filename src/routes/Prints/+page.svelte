@@ -46,7 +46,7 @@
         {/each}
         <!-- Add more print items as needed -->
     </div>
-    {#if buyPageOpen || true}
+    {#if buyPageOpen}
         <div id="print-sell-overlay" class="fixed inset-0 bg-black/80 z-30">
             <div class="relative w-full h-full">
                 <button
@@ -128,7 +128,7 @@
                 </div>
             </div>
         </div>
-        {#if buyRequestOpen || true}
+        {#if buyRequestOpen}
             <div id="print-sell-overlay" class="fixed inset-0 bg-black/70 z-50">
                 <button
                     id="close-print-info"
