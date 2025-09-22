@@ -2,29 +2,38 @@
     import Navbar from "$lib/Navbar.svelte";
     let { data } = $props();
     let storys = data.stories;
-    console.log(storys)
+    console.log(storys);
 </script>
 
 <Navbar />
-<div class="w-full h-full overflow-y-auto lg:pl-4 lg:p-4">
+<div class="w-full h-full overflow-y-auto lg:p-4 lg:pl-4">
     <h1
-        class="text-4xl font-cabin font-[400] pl-12 pt-3 pb-3 absolute w-full bg-black pb-4 lg:hidden"
+        class="text-4xl font-cabin font-[400] pl-12 pt-3 absolute w-full bg-black pb-4 lg:hidden"
     >
         Stories
     </h1>
     <div class="pt-20 lg:pt-4 grid grid-cols-1 gap-6 p-4">
         <!-- Story Items -->
-        {#each storys as { coverImage, title, url }}
+        {#each storys as { coverImage, title, url, alt }}
             <a href="/Stories/{url}">
-                <div class="story-item cursor-pointer group" data-story="1">
-                    <img
-                        src={coverImage}
-                        alt={title}
-                        class="w-3/4 m-auto object-cover rounded-lg transition-transform lg:group-hover:scale-[101%]"
-                    />
-                    <h3
-                        class="mt-4 text-xl text-center group-hover:text-red-800"
-                    ></h3>
+                <div
+                    class="story-item m-auto "
+                    data-story="1"
+                >
+                    <div class="relative w-3/4 cursor-pointer group lg:mx-auto">
+                        <img
+                            src={coverImage}
+                            {alt}
+                            class="w-full object-cover rounded-lg transition-transform lg:group-hover:scale-[101%]"
+                        />
+                        <h1
+                            class="transition-transform absolute top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4
+                                   text-4xl group-hover:bg-black/80 bg-black/60 p-2 rounded-lg
+                                   font-semibold"
+                        >
+                            {title}
+                        </h1>
+                    </div>
                 </div>
             </a>
         {/each}

@@ -47,9 +47,10 @@
                 class="bg-opacity-80 flex items-center justify-center size-full"
                 style="backdrop-filter: blur(2px);"
             >
-                <div
-                    class="w-full h-full"
-                >
+                <div class="relative w-full h-full">
+                    <div class="absolute text-4xl left-1/2 -translate-x-1/4 -translate-y-8 text-center z-10">
+                        {thisEntry.title}
+                    </div>
                     <Carousel
                         images={thisEntry.images}
                         bind:index={carouselIndex}
