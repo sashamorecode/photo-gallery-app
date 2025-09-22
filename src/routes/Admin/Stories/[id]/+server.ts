@@ -12,6 +12,7 @@ export async function DELETE({ params }) {
 export async function PUT({ params, request }) {
     let id = params.id
     const jsonData = await request.json();
+    console.log(jsonData)
     // Build JSON object
     // TODO: Save to database or process as needed
     // e.g., await db.news.create({ data: jsonData });
