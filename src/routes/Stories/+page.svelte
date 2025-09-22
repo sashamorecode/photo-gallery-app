@@ -20,7 +20,7 @@
                     class="story-item m-auto "
                     data-story="1"
                 >
-                    <div class="relative w-3/4 cursor-pointer group lg:mx-auto">
+                    <div class="relative w-full lg:w-3/4 cursor-pointer group lg:mx-auto">
                         <img
                             src={coverImage}
                             {alt}
