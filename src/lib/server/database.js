@@ -92,7 +92,7 @@ export function getStories() {
     return stories;
 }
 export function updateStory(id, story) {
-    db.prepare('UPDATE stories SET coverImage=?, title=? WHERE id=?').run(story.coverImage, story.title, id);
+    db.prepare('UPDATE stories SET url=?, coverImage=?, title=? WHERE id=?').run(story.url, story.coverImage, story.title, id);
     db.prepare('DELETE FROM story_images WHERE story_id=?').run(id);
     const imagesStmt = db.prepare('INSERT INTO story_images (story_id, src, alt, title) VALUES (?, ?, ?, ?)');
     for (const img of story.images) {
