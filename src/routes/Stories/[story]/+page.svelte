@@ -27,7 +27,7 @@
 </script>
 
 <Navbar />
-<div class="w-full h-full overflow-y-auto lg:overflow-y-clip lg:p-4">
+<div class="w-full h-full overflow-y-clip lg:p-4">
     <h1
         class="text-4xl font-cabin font-[400] pl-12 pt-3 w-full bg-black pb-4 lg:hidden"
     >
