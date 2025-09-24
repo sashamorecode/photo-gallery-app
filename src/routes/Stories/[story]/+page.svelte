@@ -62,7 +62,7 @@
             >
                 <div class="relative w-full h-full -top-1/4 lg:top-0">
                     <div
-                        class="hidden lg:block absolute text-4xl left-1/2 -translate-x-1/4 -translate-y-8 text-center z-10"
+                        class="hidden lg:block absolute text-4xl left-1/2 -translate-x-1/4 -translate-y-8 text-center z-10 font-[courier]"
                     >
                         {thisEntry.title}
                     </div>
