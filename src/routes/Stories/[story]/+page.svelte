@@ -27,7 +27,7 @@
     let isPageLoaded = $state(false);
     setTimeout(() => {
         isPageLoaded = true;
-    }, 1000);
+    }, 500);
 </script>
 
 <svelte:head>
