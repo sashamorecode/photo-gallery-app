@@ -16,7 +16,7 @@
     <div class="pt-20 lg:pt-20 mx-auto grid grid-cols-1 gap-6 p-4 lg:pl-0">
         <!-- Story Items -->
         {#each storys as { coverImage, title, url, alt }}
-            <a href="/Stories/{url}">
+            <a href="/Stories/{url}" data-sveltekit-preload-data>
                 <div
                     class="block story-item mx-auto"
                     data-story="1"

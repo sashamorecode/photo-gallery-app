@@ -43,6 +43,7 @@
                     <a
                         href="/"
                         class="lg:hidden text-red-800 hover:text-red-800 transition"
+                        data-sveltekit-preload-data
                         >Home</a
                     >
                     {#each links as link}
