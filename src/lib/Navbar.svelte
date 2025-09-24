@@ -29,14 +29,16 @@
     <div class="p-0 lg:p-8 flex flex-col justify-between h-full">
         <div id="nav-content" class="flex-grow lg:block hidden w-[30%]">
             <div>
-                <div class="hidden lg:block hover:scale-105 hover:text-red-800">
-                    <a href="/">
+                <a href="/">
+                    <div
+                        class="hidden lg:block hover:scale-105 hover:text-red-800"
+                    >
                         <h1 class="text-3xl">Jonas Schledorn</h1>
                         <h2 class="text-base mb-8 text-gray-600">
                             PHOTOGRAPHER
                         </h2>
-                    </a>
-                </div>
+                    </div>
+                </a>
                 <nav class="flex flex-col space-y-2">
                     <a
                         href="/"
