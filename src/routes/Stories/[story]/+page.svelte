@@ -60,7 +60,7 @@
                 class="bg-opacity-80 flex items-center justify-center size-full"
                 style="backdrop-filter: blur(2px);"
             >
-                <div class="relative w-full h-full -top-1/4 lg:top-0">
+                <div class="relative w-full h-full -top-1/12 lg:top-0 pt-10">
                     <div
                         class="hidden lg:block absolute text-4xl left-1/2 -translate-x-1/4 -translate-y-8 text-center z-10 font-[courier]"
                     >

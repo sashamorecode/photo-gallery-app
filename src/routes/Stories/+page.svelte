@@ -18,7 +18,7 @@
         {#each storys as { coverImage, title, url, alt }}
             <a href="/Stories/{url}">
                 <div
-                    class="absolute block story-item m-auto "
+                    class="lg:absolute block story-item mx-auto"
                     data-story="1"
                 >
                     <div class="relative w-full lg:w-3/4 cursor-pointer group lg:mx-auto">
