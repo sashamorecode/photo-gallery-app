@@ -30,7 +30,7 @@
             <h1 class="text-4xl mb:text-3xl">Jonas Schledorn</h1>
             <h2 class="text-base mb-8 text-gray-600">PHOTOGRAPHER</h2>
         </div>
-        <div class="overflow-hidden relative mt-20 size-full">
+        <div class="overflow-hidden relative mt-20 size-full translate-y-20 lg:translate-y-0">
             <Carousel
                 {images}
                 bind:index={imageIdx}
@@ -40,7 +40,6 @@
                 class="bg-transparent flex xl:h-[80vh] sm:h-[80vh] 2xl:h-[80vh] lg:mr-56"
             >
                 <Controls />
-                <CarouselIndicators />
             </Carousel>
         </div>
     </div>
