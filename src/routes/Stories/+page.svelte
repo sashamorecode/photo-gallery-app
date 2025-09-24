@@ -18,14 +18,14 @@
         {#each storys as { coverImage, title, url, alt }}
             <a href="/Stories/{url}">
                 <div
-                    class="lg:absolute block story-item mx-auto"
+                    class="block story-item mx-auto"
                     data-story="1"
                 >
                     <div class="relative w-full lg:w-3/4 cursor-pointer group lg:mx-auto">
                         <img
                             src={coverImage}
                             {alt}
-                            class="object-cover rounded-lg transition-transform lg:group-hover:scale-[101%]"
+                            class="w-full object-cover rounded-lg transition-transform lg:group-hover:scale-[101%] mx-center"
                         />
                         <h1
                             class="transition-transform absolute top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4
