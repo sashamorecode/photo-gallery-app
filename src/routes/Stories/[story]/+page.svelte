@@ -11,12 +11,12 @@
 
     // Carousel Modal State
     let showCarousel = $state(false);
-    let carouselIndex = $state(0);
+    let imageIdx = $state(0);
 
     let image = $state();
 
     function openCarousel(idx) {
-        carouselIndex = idx;
+        imageIdx = idx;
         showCarousel = true;
         document.body.style.overflow = "hidden"; // prevent scroll
     }
@@ -24,8 +24,21 @@
         showCarousel = false;
         document.body.style.overflow = ""; // restore scroll
     }
+    let isPageLoaded = $state(false);
+    setTimeout(() => {
+        isPageLoaded = true;
+    }, 1000);
 </script>
 
+<svelte:head>
+    {#if isPageLoaded}
+        {#each thisEntry.images as image, idx}
+            {#if Math.abs(imageIdx - idx) < 3}
+                <link rel="preload" as="image" href={image.src} />
+            {/if}
+        {/each}
+    {/if}
+</svelte:head>
 <Navbar />
 <div class="w-full h-full overflow-y-clip lg:p-4">
     <h1
@@ -48,12 +61,14 @@
                 style="backdrop-filter: blur(2px);"
             >
                 <div class="relative w-full h-full -top-1/4 lg:top-0">
-                    <div class="hidden lg:block absolute text-4xl left-1/2 -translate-x-1/4 -translate-y-8 text-center z-10">
+                    <div
+                        class="hidden lg:block absolute text-4xl left-1/2 -translate-x-1/4 -translate-y-8 text-center z-10"
+                    >
                         {thisEntry.title}
                     </div>
                     <Carousel
                         images={thisEntry.images}
-                        bind:index={carouselIndex}
+                        bind:index={imageIdx}
                         duration={0}
                         imgClass="object-contain"
                         style="height: 90%;"

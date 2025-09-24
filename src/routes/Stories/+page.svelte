@@ -5,6 +5,7 @@
     console.log(storys);
 </script>
 
+
 <Navbar />
 <div class="w-full h-full overflow-y-auto lg:p-4 lg:pl-4">
     <h1

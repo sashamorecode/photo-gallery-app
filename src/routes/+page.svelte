@@ -2,10 +2,24 @@
     import Navbar from "$lib/Navbar.svelte";
     import { Carousel, Controls, CarouselIndicators } from "flowbite-svelte";
     let { data } = $props();
-    const images = data.homepage_images;
+    const images = $state(data.homepage_images);
     console.log(images);
     let imageIdx = $state(0);
+    let isPageLoaded = $state(false);
+    setTimeout(() => {
+        isPageLoaded = true;
+    }, 2000);
 </script>
+
+<svelte:head>
+    {#if isPageLoaded}
+        {#each images as image, idx}
+            {#if Math.abs(imageIdx - idx) < 3}
+                <link rel="preload" as="image" href={image.src} />
+            {/if}
+        {/each}
+    {/if}
+</svelte:head>
 
 <div
     class="flex h-screen w-full bg-black text-white overflow-hidden font-amiko font-[400]"
