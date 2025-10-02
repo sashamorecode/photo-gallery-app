@@ -47,11 +47,11 @@
         News
     </h1>
     <div class="w-full h-full lg:pt-0 p-4">
-        <div id="news-detail" class="mt-8 h-full w-full">
+        <div id="news-detail" class="mt-2 h-full w-full">
             <a href="/Stories">
                 <button
                     id="back-button"
-                    class="mb-6 items-center text-red-800 hover:text-red-300 transition hidden lg:flex"
+                    class="pb-8 items-center text-red-800 hover:text-red-300 transition hidden lg:flex"
                 >
                     <i class="fas fa-arrow-left mr-2"></i> Back to Stories
                 </button>
@@ -60,18 +60,13 @@
                 class="bg-opacity-80 flex items-center justify-center size-full"
                 style="backdrop-filter: blur(2px);"
             >
-                <div class="relative w-full h-full -top-1/12 lg:top-0 pt-10">
-                    <div
-                        class="hidden lg:block absolute text-4xl left-1/2 -translate-x-1/4 -translate-y-8 text-center z-10 font-[courier]"
-                    >
-                        {thisEntry.title}
-                    </div>
-                    <Carousel
+                <div class="relative w-full h-[90vh] -top-[5vh]">
+                                        <Carousel
                         images={thisEntry.images}
                         bind:index={imageIdx}
                         duration={0}
                         imgClass="object-contain"
-                        style="height: 90%;"
+                        style="height: 100%;"
                         class="bg-transparent flex"
                     >
                         <Controls />
