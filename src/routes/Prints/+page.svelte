@@ -19,13 +19,15 @@
 </script>
 
 <Navbar />
-
 <div class="w-full h-full overflow-y-auto lg:pl-4 lg:p-4">
     <h1
         class="text-4xl font-cabin font-[400] pl-12 pt-3 pb-3 absolute w-full bg-black pb-4 lg:hidden"
     >
         Prints
     </h1>
+    {#if printListings.length == 0}
+        <div class="text-4xl text-center">Coming Soon</div>
+    {/if}
     <div class="pt-20 lg:pt-4 grid grid-cols-2 lg:grid-cols-3 gap-6 p-4">
         <!-- Story Items -->
         {#each printListings as { src, title }, idx}
@@ -44,7 +46,7 @@
                 </h3>
             </div>
         {/each}
-        <!-- Add more print items as needed -->
+        <!--Add more print items as needed -->
     </div>
     {#if buyPageOpen}
         <div id="print-sell-overlay" class="fixed inset-0 bg-black/80 z-30">

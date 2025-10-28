@@ -29,8 +29,7 @@
                         />
                         <h1
                             class="transition-transform absolute top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4
-                                   text-4xl group-hover:bg-black/100 bg-black/70 px-2 pt-2 rounded-lg
-                                   font-[courier]"
+                                   text-4xl group-hover:bg-black/100 bg-black/70 px-2 pt-2 rounded-lg"
                         >
                             {title}
                         </h1>
