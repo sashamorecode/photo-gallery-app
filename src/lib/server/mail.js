@@ -19,9 +19,8 @@ export function sendMail(mailer, from, to, subject, htmlContent) {
     .setTo(recipients)
     .setBcc(bccRecipients) // Adding BCC recipients
     .setReplyTo(sentFrom)
-    .setSubject("Welcome! Your free trial is ready.")
+    .setSubject(subject)
     .setHtml(htmlContent)
-    .setText("Hey there! Welcome to Your Business, we're happy to have you here! You'll be happy to know that your free trial awaits, all you need to do is head to your account, log in and start playing. Remember to check out our guides and contact support if you need anything. Regards, The Your Business Team");
 
   return mailer.email.send(emailParams)
     .then(response => {
