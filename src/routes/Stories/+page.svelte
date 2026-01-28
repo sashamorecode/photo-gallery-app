@@ -24,7 +24,7 @@
               class="w-full object-cover rounded-lg transition-transform lg:group-hover:scale-[101%] mx-center"
             />
             <h1
-              class="text-center transition-transform text-3xl group-hover:bg-black/100 bg-black/70 px-2 pt-2 rounded-lg"
+              class="text-center transition-transform text-2xl group-hover:scale-105 px-2 pt-2 rounded-lg"
             >
               {title}
             </h1>
