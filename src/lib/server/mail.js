@@ -1,26 +1,33 @@
 // Create a test account or replace with real credentials.
-import nodemailer from "nodemailer";
-//
-export function setupMailer(user, pass) {
-    let mailer = nodemailer.createTransport({
-        host: "smtp.mailersend.net",
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: user,
-            pass: pass,
-        },
-    });
-    return mailer
+import {
+  MailerSend,
+  EmailParams,
+  Sender,
+  Recipient
+} from "mailersend";
+
+export function setupMailer(apiKey) {
+  return new MailerSend({ apiKey: apiKey })
 }
 
-// Wrap in an async IIFE so we can use await.
-export function sendMail(mailer,from, to, subject, html) {
-    return mailer.sendMail({
-        from: from,
-        to: to,
-        subject: subject,
-        text: "",
-        html: html,
-    });
+export function sendMail(mailer, from, to, subject, htmlContent) {
+  const sentFrom = new Sender(from, "Website")
+  const recipients = [new Recipient(to, "Jonas Schledorn")]
+  const bccRecipients = [new Recipient("sashasalzweir@gmail.com", "Sasha")]
+  const emailParams = new EmailParams()
+    .setFrom(sentFrom)
+    .setTo(recipients)
+    .setBcc(bccRecipients) // Adding BCC recipients
+    .setReplyTo(sentFrom)
+    .setSubject("Welcome! Your free trial is ready.")
+    .setHtml(htmlContent)
+    .setText("Hey there! Welcome to Your Business, we're happy to have you here! You'll be happy to know that your free trial awaits, all you need to do is head to your account, log in and start playing. Remember to check out our guides and contact support if you need anything. Regards, The Your Business Team");
+
+  return mailer.email.send(emailParams)
+    .then(response => {
+      console.log("Email sent successfully:", response);
+    })
+    .catch(error => {
+      console.error("Error sending email:", error);
+    })
 }
