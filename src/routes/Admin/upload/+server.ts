@@ -7,6 +7,7 @@ import sharp from "sharp";
 const MAX_WIDTH = 1920;
 const MAX_HEIGHT = 1080;
 const JPEG_QUALITY = 90;
+const UPLOADS_ROOT = resolve(process.env.UPLOADS_DIR ?? resolve(process.cwd(), "static", "uploads"));
 
 function getDateFolder() {
     const now = new Date();
@@ -52,7 +53,7 @@ export async function POST({ request }) {
     const imageBuffer = Buffer.from(await image.arrayBuffer());
 
     const dateFolder = getDateFolder();
-    const uploadsDirectory = resolve("static/uploads", dateFolder);
+    const uploadsDirectory = resolve(UPLOADS_ROOT, dateFolder);
     await mkdir(uploadsDirectory, { recursive: true });
 
     const outputFormat = getOutputFormatFromMime(image.type);
