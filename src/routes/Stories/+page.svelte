@@ -6,7 +6,7 @@
 </script>
 
 <Navbar />
-<div class="w-full h-full overflow-y-auto">
+<div class="w-full h-full overflow-y-auto pb-12 lg:pb-0">
   <h1
     class="text-4xl font-cabin font-[400] pl-12 pt-3 absolute w-full bg-black pb-4 lg:hidden"
   >
