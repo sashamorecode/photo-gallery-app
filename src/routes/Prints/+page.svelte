@@ -21,7 +21,7 @@
 <Navbar />
 <div class="w-full h-full overflow-y-auto lg:pl-4 lg:p-4">
     <h1
-        class="text-4xl font-cabin font-[400] pl-12 pt-3 pb-3 absolute w-full bg-black pb-4 lg:hidden"
+        class="text-4xl font-cabin font-[400] pl-12 pt-3 absolute w-full bg-black pb-4 lg:hidden"
     >
         Prints
     </h1>
@@ -39,7 +39,7 @@
                 <img
                     {src}
                     alt="Story 1"
-                    class="w-full m-auto object-cover rounded-lg transition-transform lg:group-hover:scale-[101%]"
+                    class="max-w-full h-auto max-h-[70vh] m-auto object-contain rounded-lg transition-transform lg:group-hover:scale-[101%]"
                 />
                 <h3 class="mt-4 text-xl text-center group-hover:text-red-800">
                     {title}

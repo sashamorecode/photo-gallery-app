@@ -21,7 +21,7 @@
             <img
               src={coverImage}
               {alt}
-              class="w-full object-cover rounded-lg transition-transform lg:group-hover:scale-[101%] mx-center"
+              class="max-w-full h-auto max-h-[75vh] object-contain rounded-lg transition-transform lg:group-hover:scale-[101%] mx-auto"
             />
             <h1
               class="text-center transition-transform text-2xl group-hover:scale-105 px-2 pt-2 rounded-lg"

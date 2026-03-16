@@ -9,7 +9,7 @@
 
 <div class="w-full h-full overflow-y-auto lg:pl-4 lg:p-4">
     <h1
-        class="text-4xl font-cabin font-[400] pl-12 pt-3 pb-3 absolute w-full bg-black pb-4 lg:hidden"
+        class="text-4xl font-cabin font-[400] pl-12 pt-3 absolute w-full bg-black pb-4 lg:hidden"
     >
         News
     </h1>
@@ -44,28 +44,28 @@
                         <img
                             src=""
                             alt=""
-                            class="w-full h-64 object-cover rounded-lg"
+                            class="max-w-full h-auto max-h-64 object-contain rounded-lg"
                         />
                     </div>
                     <div class="image-item cursor-pointer" data-index="1">
                         <img
                             src=""
                             alt=""
-                            class="w-full h-64 object-cover rounded-lg"
+                            class="max-w-full h-auto max-h-64 object-contain rounded-lg"
                         />
                     </div>
                     <div class="image-item cursor-pointer" data-index="2">
                         <img
                             src=""
                             alt=""
-                            class="w-full h-64 object-cover rounded-lg"
+                            class="max-w-full h-auto max-h-64 object-contain rounded-lg"
                         />
                     </div>
                     <div class="image-item cursor-pointer" data-index="3">
                         <img
                             src=""
                             alt=""
-                            class="w-full h-64 object-cover rounded-lg"
+                            class="max-w-full h-auto max-h-64 object-contain rounded-lg"
                         />
                     </div>
                 </div>

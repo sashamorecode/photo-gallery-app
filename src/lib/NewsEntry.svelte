@@ -6,7 +6,7 @@
     <img
         src={coverImage}
         alt={newsTitle}
-        class="size-full object-cover rounded-lg group-hover:scale-[101%] duration-300"
+        class="max-w-full h-auto max-h-[70vh] object-contain rounded-lg group-hover:scale-[101%] duration-300 mx-auto"
     />
     <h3 class="mt-4 text-red-800">{newsType}</h3>
     <h3 class="text-xl group-hover:font-bold duration-75">{newsTitle}</h3>
