@@ -173,7 +173,18 @@ async function compressAndStoreImage(buffer, originalFileName, persistToDisk) {
 
 async function migrate() {
     const db = new Database(dbPath);
-    const updates = [];
+    let migratedCount = 0;
+    const statements = new Map();
+
+    for (const { table, idColumn, imageColumn } of imageColumns) {
+        const key = `${table}.${imageColumn}`;
+        statements.set(
+            key,
+            db.prepare(
+                `UPDATE ${table} SET ${imageColumn} = ? WHERE ${idColumn} = ?`,
+            ),
+        );
+    }
 
     await mkdir(uploadsDir, { recursive: true });
 
@@ -207,14 +218,12 @@ async function migrate() {
                     !dryRun,
                 );
 
-                updates.push({
-                    table,
-                    idColumn,
-                    imageColumn,
-                    id: row.id,
-                    oldValue: originalValue,
-                    newValue: newPath,
-                });
+                if (!dryRun) {
+                    const key = `${table}.${imageColumn}`;
+                    statements.get(key).run(newPath, row.id);
+                }
+
+                migratedCount += 1;
 
                 console.log(
                     `[OK] ${table}.${imageColumn}#${row.id}: ${originalValue} -> ${newPath}`,
@@ -229,31 +238,9 @@ async function migrate() {
         }
     }
 
-    if (!dryRun && updates.length > 0) {
-        const statements = new Map();
-        for (const { table, idColumn, imageColumn } of imageColumns) {
-            const key = `${table}.${imageColumn}`;
-            statements.set(
-                key,
-                db.prepare(
-                    `UPDATE ${table} SET ${imageColumn} = ? WHERE ${idColumn} = ?`,
-                ),
-            );
-        }
-
-        const tx = db.transaction((rowsToUpdate) => {
-            for (const row of rowsToUpdate) {
-                const key = `${row.table}.${row.imageColumn}`;
-                statements.get(key).run(row.newValue, row.id);
-            }
-        });
-
-        tx(updates);
-    }
-
     db.close();
 
-    console.log(`\nMigrated images: ${updates.length}`);
+    console.log(`\nMigrated images: ${migratedCount}`);
     if (dryRun) {
         console.log("Dry run complete. No DB changes were written.");
     }
