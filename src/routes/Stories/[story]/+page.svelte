@@ -44,7 +44,7 @@
     <h1
         class="text-4xl font-cabin font-[400] pl-12 pt-3 w-full bg-black pb-4 lg:hidden"
     >
-        News
+        Stories
     </h1>
     <div class="w-full h-full lg:pt-0 p-4">
         <div id="news-detail" class="mt-2 h-full w-full">
