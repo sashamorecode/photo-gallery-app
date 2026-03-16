@@ -8,7 +8,7 @@
         icon.classList.toggle("fa-times");
     }
 
-    var links = ["Bio", "News", "Stories", "Prints", "Contact"];
+    var links = ["Bio", "News", "Stories", "Contact"];
 </script>
 
 <!-- Mobile menu button (hidden on desktop) -->

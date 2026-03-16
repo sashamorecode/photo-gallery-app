@@ -5,5 +5,4 @@
     <a href="/Admin/Homepage">Modify Homepage</a>
     <a href="/Admin/News/">Modify News Posts</a>
     <a href="/Admin/Stories">Modify Stories Posts</a>
-    <a href="/Admin/Prints">Modify Prints</a>
 </div>
