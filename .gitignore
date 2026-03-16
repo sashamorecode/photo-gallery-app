@@ -20,6 +20,7 @@ Thumbs.db
 sql.db
 mydb.sqlite
 my.sqlite
+static/
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
