@@ -7,7 +7,11 @@ import { handler } from './build/handler.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const uploadsRoot = path.resolve(process.env.UPLOADS_DIR ?? path.join(__dirname, 'static', 'uploads'));
+const uploadRootCandidates = Array.from(new Set([
+  process.env.UPLOADS_DIR,
+  path.join(__dirname, 'static', 'uploads'),
+  path.join(process.cwd(), 'static', 'uploads')
+].filter(Boolean).map((p) => path.resolve(p))));
 
 const MIME_BY_EXT = {
   '.jpg': 'image/jpeg',
@@ -20,13 +24,18 @@ const MIME_BY_EXT = {
 
 function getUploadFilePath(urlPathname) {
   const relativePath = decodeURIComponent(urlPathname.replace(/^\/uploads\//, ''));
-  const absolutePath = path.resolve(uploadsRoot, relativePath);
+  for (const root of uploadRootCandidates) {
+    const absolutePath = path.resolve(root, relativePath);
+    if (!absolutePath.startsWith(`${root}${path.sep}`)) {
+      continue;
+    }
 
-  if (!absolutePath.startsWith(`${uploadsRoot}${path.sep}`)) {
-    return null;
+    if (fs.existsSync(absolutePath) && fs.statSync(absolutePath).isFile()) {
+      return absolutePath;
+    }
   }
 
-  return absolutePath;
+  return null;
 }
 
 function serveUpload(req, res) {
@@ -44,12 +53,7 @@ function serveUpload(req, res) {
 
   const filePath = getUploadFilePath(url.pathname);
   if (!filePath) {
-    res.statusCode = 403;
-    res.end('Forbidden');
-    return true;
-  }
-
-  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.statusCode = 404;
     res.end('Not Found');
     return true;
