@@ -1,4 +1,6 @@
 <script lang="ts">
+    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+
     let { data } = $props();
     let stories = $state(data.stories);
     let currentStory = $derived(stories[0]);
@@ -10,7 +12,9 @@
     }
 
     function removeImage(index: number): void {
-        currentStory.images = currentStory.images.filter((_, i) => i !== index);
+        currentStory.images = currentStory.images.filter(
+            (_: unknown, i: number) => i !== index,
+        );
     }
 </script>
 
@@ -19,13 +23,14 @@
     <p>Select Story Entry</p>
     <select
         class="text-white"
-        onchange={(change) => {
-            let idx = change.target.selectedOptions[0].id;
+        onchange={(event) => {
+            const target = event.target as HTMLSelectElement;
+            const idx = Number(target.value);
             currentStory = stories[idx];
         }}
     >
         {#each stories as news, idx}
-            <option class="text-red-400" id={idx}>{news.title}</option>
+            <option class="text-red-400" value={idx}>{news.title}</option>
         {/each}
     </select>
     <form
@@ -65,14 +70,13 @@
                     bind:value={currentStory.title}
                 />
             </label>
-            <label>
-                Cover Image Src:
-                <input
-                    type="text"
-                    name="coverImage"
-                    bind:value={currentStory.coverImage}
-                />
-            </label>
+            <AdminImageUploadField
+                label="Cover Image"
+                value={currentStory.coverImage}
+                setValue={(nextValue) => {
+                    currentStory.coverImage = nextValue;
+                }}
+            />
             <button type="submit">Update</button>
         </div>
         <div class="flex flex-col">
@@ -81,14 +85,13 @@
                 <div
                     style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
                 >
-                    <label>
-                        Src:
-                        <input
-                            type="text"
-                            name={`images[${index}][src]`}
-                            bind:value={image.src}
-                        />
-                    </label>
+                    <AdminImageUploadField
+                        label="Image"
+                        value={image.src}
+                        setValue={(nextValue) => {
+                            image.src = nextValue;
+                        }}
+                    />
                     <label>
                         Alt:
                         <input
@@ -130,8 +133,7 @@
     button {
         margin-top: 10px;
     }
-    input,
-    textarea {
+    input {
         width: 100%;
     }
 </style>

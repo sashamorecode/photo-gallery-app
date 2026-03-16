@@ -1,4 +1,6 @@
 <script lang="ts">
+    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+
     const currentNews = $state({
         url: "",
         title: "",
@@ -65,14 +67,13 @@
                     bind:value={currentNews.title}
                 />
             </label>
-            <label>
-                Cover Image Src:
-                <input
-                    type="text"
-                    name="coverImage"
-                    bind:value={currentNews.coverImage}
-                />
-            </label>
+            <AdminImageUploadField
+                label="Cover Image"
+                value={currentNews.coverImage}
+                setValue={(nextValue) => {
+                    currentNews.coverImage = nextValue;
+                }}
+            />
             <label>
                 Date Of Publication:
                 <input
@@ -103,14 +104,13 @@
                 <div
                     style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
                 >
-                    <label>
-                        Src:
-                        <input
-                            type="text"
-                            name={`images[${index}][src]`}
-                            bind:value={currentNews.images[index].src}
-                        />
-                    </label>
+                    <AdminImageUploadField
+                        label="Image"
+                        value={currentNews.images[index].src}
+                        setValue={(nextValue) => {
+                            currentNews.images[index].src = nextValue;
+                        }}
+                    />
                     <label>
                         Alt:
                         <input

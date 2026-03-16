@@ -1,4 +1,6 @@
 <script lang="ts">
+    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+
     let { data } = $props();
     let prints = $state(data.prints);
     let currentPrint = $derived(prints[0]);
@@ -17,13 +19,14 @@
     Select Print Entry:
     <select
         class="bg-gray-600 rounded-lg p-2 my-2"
-        onchange={(change) => {
-            let idx = change.target.selectedOptions[0].id;
+        onchange={(event) => {
+            const target = event.target as HTMLSelectElement;
+            const idx = Number(target.value);
             currentPrint = prints[idx];
         }}
     >
         {#each prints as print, idx}
-            <option id={idx}>{print.title}</option>
+            <option value={idx}>{print.title}</option>
         {/each}
     </select>
     <form
@@ -64,10 +67,13 @@
             />
         </label>
 
-        <label>
-            Print Source:
-            <input type="text" name="src" bind:value={currentPrint.src} />
-        </label>
+        <AdminImageUploadField
+            label="Print Image"
+            value={currentPrint.src}
+            setValue={(nextValue) => {
+                currentPrint.src = nextValue;
+            }}
+        />
         <h3>Sizes</h3>
         {#each currentPrint.sizes as size, index}
             <div
@@ -104,8 +110,7 @@
     button {
         margin-top: 10px;
     }
-    input,
-    textarea {
+    input {
         width: 100%;
     }
 </style>

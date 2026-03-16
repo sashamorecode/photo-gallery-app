@@ -1,9 +1,6 @@
 <script lang="ts">
-    type ImageData = {
-        src: string;
-        alt: string;
-        title: string;
-    };
+    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+
     const currentStory = $state({
         url: "",
         title: "",
@@ -64,14 +61,13 @@
                     bind:value={currentStory.title}
                 />
             </label>
-            <label>
-                Cover Image Src:
-                <input
-                    type="text"
-                    name="coverImage"
-                    bind:value={currentStory.coverImage}
-                />
-            </label>
+            <AdminImageUploadField
+                label="Cover Image"
+                value={currentStory.coverImage}
+                setValue={(nextValue) => {
+                    currentStory.coverImage = nextValue;
+                }}
+            />
             <button type="submit">Submit</button>
         </div>
         <div class="flex flex-col">
@@ -80,14 +76,13 @@
                 <div
                     style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
                 >
-                    <label>
-                        Src:
-                        <input
-                            type="text"
-                            name={`images[${index}][src]`}
-                            bind:value={currentStory.images[index].src}
-                        />
-                    </label>
+                    <AdminImageUploadField
+                        label="Image"
+                        value={currentStory.images[index].src}
+                        setValue={(nextValue) => {
+                            currentStory.images[index].src = nextValue;
+                        }}
+                    />
                     <label>
                         Alt:
                         <input
@@ -129,8 +124,7 @@
     button {
         margin-top: 10px;
     }
-    input,
-    textarea {
+    input {
         width: 100%;
     }
 </style>

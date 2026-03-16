@@ -1,4 +1,6 @@
 <script lang="ts">
+    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+
     let { data } = $props();
     let newsPosts = $state(data.news);
     let currentNews = $derived(newsPosts[0]);
@@ -10,7 +12,9 @@
     }
 
     function removeImage(index: number): void {
-        currentNews.images = currentNews.images.filter((_, i) => i !== index);
+        currentNews.images = currentNews.images.filter(
+            (_: unknown, i: number) => i !== index,
+        );
     }
 </script>
 
@@ -19,13 +23,14 @@
     <p>Select News Entry</p>
     <select
         class="text-white"
-        onchange={(change) => {
-            let idx = change.target.selectedOptions[0].id;
+        onchange={(event) => {
+            const target = event.target as HTMLSelectElement;
+            const idx = Number(target.value);
             currentNews = newsPosts[idx];
         }}
     >
         {#each newsPosts as news, idx}
-            <option class="text-red-400" id={idx}>{news.title}</option>
+            <option class="text-red-400" value={idx}>{news.title}</option>
         {/each}
     </select>
     <form
@@ -65,14 +70,13 @@
                     bind:value={currentNews.title}
                 />
             </label>
-            <label>
-                Cover Image Src:
-                <input
-                    type="text"
-                    name="coverImage"
-                    bind:value={currentNews.coverImage}
-                />
-            </label>
+            <AdminImageUploadField
+                label="Cover Image"
+                value={currentNews.coverImage}
+                setValue={(nextValue) => {
+                    currentNews.coverImage = nextValue;
+                }}
+            />
             <label>
                 Date Of Publication:
                 <input
@@ -103,14 +107,13 @@
                 <div
                     style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
                 >
-                    <label>
-                        Src:
-                        <input
-                            type="text"
-                            name={`images[${index}][src]`}
-                            bind:value={image.src}
-                        />
-                    </label>
+                    <AdminImageUploadField
+                        label="Image"
+                        value={image.src}
+                        setValue={(nextValue) => {
+                            image.src = nextValue;
+                        }}
+                    />
                     <label>
                         Alt:
                         <input

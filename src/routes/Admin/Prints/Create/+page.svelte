@@ -1,4 +1,6 @@
 <script lang="ts">
+    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+
     let currentPrint = $state({
         title: "",
         description: "",
@@ -58,10 +60,13 @@
             />
         </label>
 
-        <label>
-            Print Source:
-            <input type="text" name="src" bind:value={currentPrint.src} />
-        </label>
+        <AdminImageUploadField
+            label="Print Image"
+            value={currentPrint.src}
+            setValue={(nextValue) => {
+                currentPrint.src = nextValue;
+            }}
+        />
         <h3>Sizes</h3>
         {#each currentPrint.sizes as { size, price }, index}
             <div
@@ -106,8 +111,7 @@
     button {
         margin-top: 10px;
     }
-    input,
-    textarea {
+    input {
         width: 100%;
     }
 </style>

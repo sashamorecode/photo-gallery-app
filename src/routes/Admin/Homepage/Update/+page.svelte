@@ -1,4 +1,6 @@
 <script lang="ts">
+    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+
     let { data } = $props();
     let images = $state(data.images);
     function addImage(): void {
@@ -6,7 +8,7 @@
     }
 
     function removeImage(index: number): void {
-        images = images.filter((_, i) => i !== index);
+        images = images.filter((_: unknown, i: number) => i !== index);
     }
 </script>
 
@@ -41,14 +43,13 @@
                 <div
                     style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
                 >
-                    <label>
-                        Src:
-                        <input
-                            type="text"
-                            name={`images[${index}][src]`}
-                            bind:value={image.src}
-                        />
-                    </label>
+                    <AdminImageUploadField
+                        label="Image"
+                        value={image.src}
+                        setValue={(nextValue) => {
+                            image.src = nextValue;
+                        }}
+                    />
                     <button
                         type="button"
                         class="bg-red-500 rounded-lg p-1"
@@ -64,19 +65,7 @@
 </div>
 
 <style>
-    label {
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: row;
-        height: 4em;
-        border-width: 1px;
-        border-color: gray;
-    }
     button {
         margin-top: 10px;
-    }
-    input,
-    textarea {
-        width: 100%;
     }
 </style>
