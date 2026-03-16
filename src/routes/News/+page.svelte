@@ -7,7 +7,7 @@
 
 <Navbar />
 
-<div class="w-full h-full overflow-y-auto lg:pl-4 lg:p-4">
+<div class="w-full h-full overflow-y-auto lg:pl-4 lg:p-4 pb-12">
     <h1
         class="text-4xl font-cabin font-[400] pl-12 pt-3 absolute w-full bg-black pb-4 lg:hidden"
     >
