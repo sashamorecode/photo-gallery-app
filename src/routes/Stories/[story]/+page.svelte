@@ -7,7 +7,9 @@
 
     let entryUrl = $page.params.story;
     console.log(entryUrl);
-    let thisEntry = storys.find((entry) => entry.url === entryUrl);
+    let thisEntry = storys.find(
+        /** @param {{ url: string }} entry */ (entry) => entry.url === entryUrl,
+    );
 
     // Carousel Modal State
     let showCarousel = $state(false);
@@ -15,6 +17,7 @@
 
     let image = $state();
 
+    /** @param {number} idx */
     function openCarousel(idx) {
         imageIdx = idx;
         showCarousel = true;
