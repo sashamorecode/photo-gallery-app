@@ -40,40 +40,36 @@
     {/if}
 </svelte:head>
 <Navbar />
-<div class="w-full h-full overflow-y-clip lg:p-4">
+<div class="flex flex-col w-full h-full overflow-y-clip lg:p-4">
     <h1
-        class="text-4xl font-cabin font-[400] pl-12 pt-3 w-full bg-black lg:pb-4 lg:hidden"
+        class="text-4xl font-cabin font-[400] pl-12 pt-3 w-full bg-black lg:hidden"
     >
         Stories
     </h1>
-    <div class="w-full h-full lg:pt-0 lg:py-4 px-4">
-        <div id="news-detail" class="lg:mt-2 h-full w-full">
-            <a href="/Stories">
-                <button
-                    id="back-button"
-                    class="pb-8 items-center text-red-800 hover:text-red-300 transition hidden lg:flex"
-                >
-                    <i class="fas fa-arrow-left mr-2"></i> Back to Stories
-                </button>
-            </a>
-            <div
-                class="bg-opacity-80 flex items-center justify-center size-fit w-full h-full"
-                style="backdrop-filter: blur(2px);"
+    <div id="news-detail" class="lg:mt-2 h-full w-full flex flex-col">
+        <a href="/Stories">
+            <button
+                id="back-button"
+                class="pb-8 items-center text-red-800 hover:text-red-300 transition hidden lg:flex"
             >
-                <div class="relative w-full h-[90vh] size-fit">
-                                        <Carousel
-                        images={thisEntry.images}
-                        bind:index={imageIdx}
-                        duration={0}
-                        imgClass="object-contain"
-                        style="height: 90%;"
-                        class="bg-transparent flex"
-                    >
-                        <Controls />
-                        <CarouselIndicators />
-                    </Carousel>
-                </div>
-            </div>
+                <i class="fas fa-arrow-left mr-2"></i> Back to Stories
+            </button>
+        </a>
+        <div
+            class="overflow-hidden bg-opacity-80 relative flex flex-1 items-center justify-center my-2 w-full"
+            style="backdrop-filter: blur(2px);"
+        >
+            <Carousel
+                images={thisEntry.images}
+                bind:index={imageIdx}
+                duration={0}
+                imgClass="object-contain size-full"
+                style="height: 100%;"
+                class="bg-transparent flex h-[92vh] w-full"
+            >
+                <Controls class="" />
+                <CarouselIndicators class="hidden lg:block"/>
+            </Carousel>
         </div>
     </div>
 </div>
