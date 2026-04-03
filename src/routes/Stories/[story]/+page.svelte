@@ -2,6 +2,7 @@
     import { page } from "$app/stores";
     import Navbar from "$lib/Navbar.svelte";
     import { Carousel, Controls, CarouselIndicators } from "flowbite-svelte";
+    import ControlButton from "flowbite-svelte/ControlButton.svelte";
     let { data } = $props();
     let storys = data.stories;
 
@@ -67,7 +68,18 @@
                 style="height: 100%;"
                 class="bg-transparent flex h-[92vh] w-full"
             >
-                <Controls class="" />
+                <Controls>
+                    {#snippet children(changeSlide)}
+                        <ControlButton name="Previous" forward={false}
+                            onclick={() => { if (imageIdx > 0) changeSlide(false); }}
+                            class={imageIdx === 0 ? "opacity-30 !cursor-not-allowed" : ""}
+                        />
+                        <ControlButton name="Next" forward={true}
+                            onclick={() => { if (imageIdx < thisEntry.images.length - 1) changeSlide(true); }}
+                            class={imageIdx === thisEntry.images.length - 1 ? "opacity-30 !cursor-not-allowed" : ""}
+                        />
+                    {/snippet}
+                </Controls>
                 <CarouselIndicators class="hidden lg:block"/>
             </Carousel>
         </div>
