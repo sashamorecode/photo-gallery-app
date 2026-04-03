@@ -30,7 +30,7 @@
             <h1 class="text-4xl lg:text-3xl">Jonas Schledorn</h1>
             <h2 class="text-base lg:mb-8 text-gray-600">PHOTOGRAPHER</h2>
         </div>
-        <div class="overflow-hidden relative flex-1 flex items-center justify-center my-2 lg:pt-0 lg:translate-x-[-2rem] h-full">
+        <div class="overflow-hidden relative flex-1 flex items-center justify-center my-2 lg:pt-0 lg:my-8 lg:translate-x-[-2rem] h-full">
             <Carousel
                 {images}
                 bind:index={imageIdx}
