@@ -40,7 +40,7 @@
     {/if}
 </svelte:head>
 <Navbar />
-<div class="flex flex-col w-full h-full overflow-y-clip lg:p-4">
+<div class="flex flex-col w-full h-full overflow-y-clip lg:p-4 pb-8 lg:pb-0">
     <h1
         class="text-4xl font-cabin font-[400] pl-12 pt-3 w-full bg-black lg:hidden"
     >

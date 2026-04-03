@@ -1,6 +1,7 @@
 <script>
     import Navbar from "$lib/Navbar.svelte";
     import { Carousel, Controls, CarouselIndicators } from "flowbite-svelte";
+    import ControlButton from "flowbite-svelte/ControlButton.svelte";
     let { data } = $props();
     const images = $state(data.homepage_images);
     console.log(images);
@@ -38,8 +39,20 @@
                 imgClass="object-contain size-full"
                 style="height: 100%;"
                 class="bg-transparent flex h-[92vh] w-full lg:w-[70vw] lg:h-[80vh]"
+                onchange={(img) => { const idx = images.indexOf(img); if (idx === -1) { imageIdx = imageIdx; } }}
             >
-                <Controls />
+                <Controls>
+                    {#snippet children(changeSlide)}
+                        <ControlButton name="Previous" forward={false}
+                            onclick={() => { if (imageIdx > 0) changeSlide(false); else imageIdx = 0; }}
+                            class={imageIdx === 0 ? "opacity-30 !cursor-not-allowed" : ""}
+                        />
+                        <ControlButton name="Next" forward={true}
+                            onclick={() => { if (imageIdx < images.length - 1) changeSlide(true); else imageIdx = images.length - 1; }}
+                            class={imageIdx === images.length - 1 ? "opacity-30 !cursor-not-allowed" : ""}
+                        />
+                    {/snippet}
+                </Controls>
             </Carousel>
         </div>
     </div>
