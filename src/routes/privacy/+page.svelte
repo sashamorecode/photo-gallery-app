@@ -43,10 +43,10 @@
                         Third-party resources
                     </h2>
                     <p>
-                        Fonts and styles are loaded from external content
-                        delivery networks (Google Fonts, Cloudflare). Loading
-                        these resources may transmit your IP address and browser
-                        details to the provider.
+                        Icons and a stylesheet are loaded from external content
+                        delivery networks (Font Awesome and Tailwind CSS, hosted
+                        on Cloudflare). Loading these resources may transmit
+                        your IP address and browser details to the provider.
                     </p>
                 </section>
 
@@ -70,9 +70,9 @@
                     <p>
                         For any privacy questions, contact:
                         <a
-                            href="mailto:jonasschledorn@web.de"
+                            href="mailto:sashasalzweir@gmail.com"
                             class="text-red-800 hover:text-red-700"
-                            >jonasschledorn@web.de</a
+                            >sashasalzweir@gmail.com</a
                         >
                     </p>
                 </section>
