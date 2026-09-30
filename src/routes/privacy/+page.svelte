@@ -43,10 +43,10 @@
                         Third-party resources
                     </h2>
                     <p>
-                        Icons and a stylesheet are loaded from external content
-                        delivery networks (Font Awesome and Tailwind CSS, hosted
-                        on Cloudflare). Loading these resources may transmit
-                        your IP address and browser details to the provider.
+                        Fonts and styles are loaded from external content
+                        delivery networks (Google Fonts, Cloudflare). Loading
+                        these resources may transmit your IP address and browser
+                        details to the provider.
                     </p>
                 </section>
 

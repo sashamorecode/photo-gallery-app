@@ -1,35 +1,6 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
-@theme {
-    --font-sans: 'Open Sans', sans-serif;
-    --font-amiko: 'Amiko', sans-serif;
-    --font-cabin: 'Cabin', sans-serif;
-}
-
-@font-face {
-    font-family: 'Amiko';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('./lib/assets/fonts/Amiko-Regular.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'Cabin';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: url('./lib/assets/fonts/Cabin-SemiBold.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'Open Sans';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('./lib/assets/fonts/OpenSans-Regular.woff2') format('woff2');
-}
 
 #nav-content {
     transition: all 0.3s ease;
