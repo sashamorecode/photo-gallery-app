@@ -6,19 +6,11 @@
     const images = $state(data.homepage_images);
     console.log(images);
     let imageIdx = $state(0);
-    let isPageLoaded = $state(false);
-    setTimeout(() => {
-        isPageLoaded = true;
-    }, 500);
 </script>
 
 <svelte:head>
-    {#if isPageLoaded}
-        {#each images as image, idx}
-            {#if Math.abs(imageIdx - idx) < 3}
-                <link rel="preload" as="image" href={image.src} />
-            {/if}
-        {/each}
+    {#if images[0]}
+        <link rel="preload" as="image" fetchpriority="high" href={images[0].src} />
     {/if}
 </svelte:head>
 

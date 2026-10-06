@@ -60,6 +60,33 @@ Seven source files. The goal was to clear the render-blocking resources from the
 
 Details on those last three are in Constraints, and they matter.
 
+## What changed (Phase 2) — hero preload
+
+`src/routes/+page.svelte` and `src/routes/Stories/[story]/+page.svelte` gated their `<link rel="preload">` behind a 500 ms client `setTimeout`, so the hint never ran during SSR. Both now emit a single server-rendered preload for the first (LCP) slide:
+
+```svelte
+<svelte:head>
+	<link rel="preload" as="image" fetchpriority="high" href={images[0].src} />
+</svelte:head>
+```
+
+The old window (`Math.abs(imageIdx - idx) < 3`) preloaded three slides, so the browser also fetched two off-screen images. The new code preloads only the visible slide. The preload href matches the SSR `<img>` exactly on both pages.
+
+Measured locally against the same production build and Lighthouse setup as the baseline (`npm run build`, `node build/index.js`, mobile throttling):
+
+| Page | Perf | LCP | Total KiB | Image reqs |
+|---|---|---|---|---|
+| `/` before | 91 | 3.5 s | 1048 | 3 |
+| `/` after | 91 | 3.5 s | **415** | **1** |
+| `/Stories/Construction` before | 84 | 4.4 s | 1199 | 3 |
+| `/Stories/Construction` after | 84 | 4.4 s | **578** | **1** |
+
+`lcp-discovery-insight` went from score 0 (`fetchpriority=high should be applied` = false) to score 1 on both pages.
+
+The perf score and LCP did not move. The LCP image was already discoverable in the initial HTML, so the hint changes the audit but not the lab timeline. The win is roughly 620 KiB less transferred per load (the two off-screen slides that are no longer fetched). The remaining LCP cost is image bytes, which is step 4 below.
+
+UI was verified unchanged: viewport captures of `/`, `/Stories/Construction` on desktop (1280x800) and mobile (390x844) before and after the change diff to 0 changed pixels above the noise floor (`maxDelta <= 1`).
+
 ## Constraints and traps
 
 **Do not delete the `@source` line in `src/app.css`.** Tailwind v4 does not scan `node_modules`, so Flowbite's own classes (`sr-only`, `rounded-full`, `bg-white/30`, the indicator dots) were only ever generated at runtime by the Play CDN. Remove the `@source` and the carousel controls and dots break.
@@ -92,7 +119,7 @@ export default defineConfig({
 
 ## Next steps, in order
 
-1. **Fix the hero preload (home and story detail).** `src/routes/+page.svelte:9-23` still gates the preload behind a 500 ms client `setTimeout`, so it never runs during SSR. Replace it with a server-rendered `<link rel="preload" as="image" fetchpriority="high" href={images[0].src}>`. Same anti-pattern at `src/routes/Stories/[story]/+page.svelte:31-45`. This is a direct LCP win and the audit explicitly flags the missing hint.
+1. ~~**Fix the hero preload (home and story detail).**~~ **Done (Phase 2).** Server-rendered `fetchpriority="high"` preload for the first slide on both pages. `lcp-discovery-insight` 0 → 1 and ~620 KiB less transferred, but LCP unchanged. See "What changed (Phase 2)".
 2. **Give the LCP image `fetchpriority="high"`, `decoding="async"`, and dimensions.** Flowbite's `Slide` does not forward attributes, so a custom slide snippet or a wrapper is the likely route. The hero lives in `src/routes/+page.svelte:35`.
 3. **Fix Stories CLS and LCP.** Add `width`/`height` or an aspect-ratio box to the covers in `src/routes/Stories/+page.svelte:21-25`, lazy-load everything below the first, and preload the first. That page alone is worth 30+ points.
 4. **Serve smaller images.** Uploaded images are capped at 1920x1080 and re-encoded, but served at full size (`src/routes/Admin/upload/+server.ts`). Generate WebP/AVIF and responsive widths, then use `srcset`/`<picture>`. The audit estimates 243 KiB savings on home alone.
