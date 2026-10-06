@@ -2,6 +2,7 @@
     import { page } from "$app/stores";
     import Navbar from "$lib/Navbar.svelte";
     import { Carousel, Controls, CarouselIndicators } from "flowbite-svelte";
+    import ControlButton from "flowbite-svelte/ControlButton.svelte";
     let { data } = $props();
     let entries = data.news;
     let entryUrl = $page.params.newsEntry;
@@ -103,7 +104,18 @@
                 class="bg-transparent size-full flex items-center"
             >
                 <div class="mx-auto z-10 bg-stone-300 backdrop-blur-lg bg-opacity-20 backdrop-saturate-100 backdrop-contrast-100 mt-auto mb-10 px-3 py-1 rounded-lg text-3xl font-stretch-110%">{thisEntry.images[carouselIndex].title}</div>
-                <Controls />
+                <Controls>
+                    {#snippet children(changeSlide)}
+                        <ControlButton name="Previous" forward={false}
+                            onclick={() => { if (carouselIndex > 0) changeSlide(false); }}
+                            class={carouselIndex === 0 ? "opacity-30 !cursor-not-allowed" : ""}
+                        />
+                        <ControlButton name="Next" forward={true}
+                            onclick={() => { if (carouselIndex < thisEntry.images.length - 1) changeSlide(true); }}
+                            class={carouselIndex === thisEntry.images.length - 1 ? "opacity-30 !cursor-not-allowed" : ""}
+                        />
+                    {/snippet}
+                </Controls>
                 <CarouselIndicators />
             </Carousel>
         </div>

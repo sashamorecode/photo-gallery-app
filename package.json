@@ -10,6 +10,7 @@
 		"migrate:legacy-images:dry": "node scripts/migrate-legacy-images.mjs --dry-run",
 		"deploy": "sudo systemctl restart photoapp.service",
 		"sync": "scp photoapp@jonasschledorn.com:/home/photoapp/photo-gallery-app/mydb.sqlite ./mydb.sqlite",
+        "sync:img": "scp -r photoapp@jonasschledorn.com:/home/photoapp/photo-gallery-app/static/uploads ./static",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

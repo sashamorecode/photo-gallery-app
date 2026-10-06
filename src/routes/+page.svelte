@@ -1,6 +1,7 @@
 <script>
     import Navbar from "$lib/Navbar.svelte";
     import { Carousel, Controls, CarouselIndicators } from "flowbite-svelte";
+    import ControlButton from "flowbite-svelte/ControlButton.svelte";
     let { data } = $props();
     const images = $state(data.homepage_images);
     console.log(images);
@@ -26,20 +27,31 @@
 >
     <Navbar></Navbar>
     <div class="w-full lg:pl-4 h-full flex flex-col">
-        <div class=" lg:hidden pt-3 pl-12">
-            <h1 class="text-4xl mb:text-3xl">Jonas Schledorn</h1>
-            <h2 class="text-base mb-8 text-gray-600">PHOTOGRAPHER</h2>
+        <div class="lg:hidden pt-3 pl-12">
+            <h1 class="text-4xl lg:text-3xl">Jonas Schledorn</h1>
+            <h2 class="text-base lg:mb-8 text-gray-600">PHOTOGRAPHER</h2>
         </div>
-        <div class="overflow-hidden relative flex-1 flex items-center justify-center lg:pt-0 -translate-y-10 lg:translate-y-0 lg:translate-x-[-2rem]">
+        <div class="overflow-hidden relative flex-1 flex items-center justify-center my-2 lg:pt-0 lg:my-8 lg:translate-x-[-2rem] h-full">
             <Carousel
                 {images}
                 bind:index={imageIdx}
                 duration={0}
                 imgClass="object-contain size-full"
-                style=";"
-                class="bg-transparent flex h-[92vh] w-full lg:w-[70vw] lg:h-[80vh] xl:h-[80vh] 2xl:h-[80vh]"
+                style="height: 100%;"
+                class="bg-transparent flex h-[92vh] w-full lg:w-[70vw] lg:h-[80vh]"
             >
-                <Controls />
+                <Controls>
+                    {#snippet children(changeSlide)}
+                        <ControlButton name="Previous" forward={false}
+                            onclick={() => { if (imageIdx > 0) changeSlide(false); }}
+                            class={imageIdx === 0 ? "opacity-30 !cursor-not-allowed" : ""}
+                        />
+                        <ControlButton name="Next" forward={true}
+                            onclick={() => { if (imageIdx < images.length - 1) changeSlide(true); }}
+                            class={imageIdx === images.length - 1 ? "opacity-30 !cursor-not-allowed" : ""}
+                        />
+                    {/snippet}
+                </Controls>
             </Carousel>
         </div>
     </div>
