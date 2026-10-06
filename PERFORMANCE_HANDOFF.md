@@ -2,9 +2,30 @@
 
 Whoever picks this up: the render-blocking work is done, but two pages still load slowly. Home is fine on desktop and mediocre on mobile; Stories is bad. This file has the numbers, what changed, and what to do next.
 
+## Next agent: start here
+
+**State as of commit `010cf69`.** Phase 1 (remove render-blocking CDN assets) and Phase 2 (server-render the LCP preload) are committed. The working tree is clean except for the intentionally untracked `vite.screenshot.config.ts` (plain-HTTP preview config, keep it). Render-blocking audits are clean and `lcp-discovery-insight` is now 1 on home and story detail.
+
+**What is actually left.** Page weight and image bytes, not discovery. Phase 2 removed ~620 KiB per load but did not move LCP, because the hero was already discoverable in the initial HTML. Home mobile now transfers ~415 KiB at perf ~91; the LCP element is still a 300+ KiB JPEG. `/Stories` (the list page) is the biggest single win and is untouched.
+
+**Do these next, in payoff order:**
+
+| # | Task | Where | Expected |
+|---|---|---|---|
+| 1 | Fix `/Stories` CLS + LCP: give the four covers `width`/`height` (or an aspect-ratio box), lazy-load all but the first, preload the first | `src/routes/Stories/+page.svelte:21-25` | +30 pts, CLS 0.559 → ~0 |
+| 2 | Hero `<img>` attributes: `fetchpriority="high"`, `decoding="async"`, intrinsic dimensions. Flowbite's `Slide` does not forward attributes, so add a custom `slide` snippet or a wrapper | `src/routes/+page.svelte:35`, `src/routes/Stories/[story]/+page.svelte:58` | small |
+| 3 | Serve smaller images: WebP/AVIF plus responsive `srcset`/`<picture>` from the upload pipeline | `src/routes/Admin/upload/+server.ts` | 243+ KiB, the real LCP win |
+| 4 | Cache `/uploads`: send `public, max-age=31536000, immutable` (filenames are content-addressed UUIDs) and stream instead of buffering | `src/routes/uploads/[...file]/+server.ts:39` | repeat-visit |
+| 5 | Compress SSR HTML and enable HTTP/2 in nginx | `configServer.sh:167-198` | TTFB |
+| 6 | Delete ~21 MB of dead legacy images, drop unused `@tailwindcss/typography`, fix the `mb:text-3xl` typo | `build/client`, `src/app.css`, `src/routes/Contact/+page.svelte:20` | bundle |
+
+Full descriptions and line references are in "Next steps, in order" below. Read "Constraints and traps" before touching `src/app.css` or the hero offset.
+
+**Verify every change the same way Phase 2 was verified:** capture `/` and a story detail route before and after, on a background preview tab, at 1280x800 and 390x844, then diff with sharp. Expect 0 changed pixels above the noise floor. Details in "Visual verification harness".
+
 ## Baseline numbers
 
-Measured locally against a production build of the current branch. Lighthouse 13.5, headless Chrome 154, default throttling, `--only-categories=performance`.
+Measured locally against a production build right after Phase 1, before the Phase 2 preload fix. Lighthouse 13.5, headless Chrome 154, default throttling, `--only-categories=performance`. Current state is in "What changed (Phase 2)".
 
 | Page | Device | Perf | FCP | LCP | TBT | CLS | Notes |
 |---|---|---|---|---|---|---|---|
@@ -47,6 +68,32 @@ CHROME_PATH=$CHROME node /tmp/lh/node_modules/lighthouse/cli/index.js \
 ```
 
 These are lab numbers. They are good for comparing before and after on the same machine. They will not equal PageSpeed Insights, which mixes in field data.
+
+### Measurement harness (used for Phase 2)
+
+If they survive, the tooling lives at `/tmp/opencode/lh` (Lighthouse 13), `/tmp/opencode/chrome` (chrome-headless-shell 154), and `/tmp/opencode/measure.sh`. `measure.sh <label>` builds, serves on `:4179`, and writes `<label>-home-mobile.json` and `<label>-storydetail-mobile.json` to `/tmp/opencode/lh`. Recreate it if gone:
+
+```sh
+#!/usr/bin/env bash
+LABEL=$1
+CHROME=$(ls /tmp/opencode/chrome/chrome-headless-shell/*/chrome-headless-shell-linux64/chrome-headless-shell)
+PORT=4179; ORIGIN="http://127.0.0.1:$PORT"
+printf 'MAIL_API_KEY=dummy\nPASSWORD=dummy\n' > .env
+npm run build > "/tmp/opencode/build-$LABEL.log" 2>&1; rm -f .env
+pkill -f "node build/index.js" 2>/dev/null; sleep 1
+PORT=$PORT HOST=127.0.0.1 ORIGIN=$ORIGIN node build/index.js > "/tmp/opencode/server-$LABEL.log" 2>&1 &
+SRV=$!; trap 'kill $SRV 2>/dev/null' EXIT
+for i in $(seq 1 60); do curl -sf "$ORIGIN/" >/dev/null 2>&1 && break; sleep 0.5; done
+run() { CHROME_PATH=$CHROME node /tmp/opencode/lh/node_modules/lighthouse/cli/index.js \
+  "$ORIGIN$1" --only-categories=performance --output=json --output-path="$2" \
+  --chrome-flags="--no-sandbox" --quiet; }
+run "/" "/tmp/opencode/lh/${LABEL}-home-mobile.json"
+run "/Stories/Construction" "/tmp/opencode/lh/${LABEL}-storydetail-mobile.json"
+```
+
+To get a true before/after, `git stash push -- <files>`, run `measure.sh before`, `git stash pop`, run `measure.sh after`. Extract metrics by summing `transferSize` over `j.audits['network-requests'].details.items`.
+
+Route note: the only story slug guaranteed in the local DB is `Stories/Construction`; `Stories/Suntem Acas%C4%83` also exists but needs URL-encoding.
 
 ## What already changed (Phase 1)
 
@@ -129,7 +176,13 @@ export default defineConfig({
 
 ## Visual verification harness
 
-The scripts I used are in `/tmp/opencode` and may be wiped. The approach is simple enough to redo: capture the same routes before and after at a fixed viewport on a background tab, then diff PNGs byte-for-byte with sharp, reporting changed pixel count, max channel delta, and a bounding box. Full-page diffs of 0.3% with a bounding box inside the sidebar nav are the expected noise floor.
+Goal: prove a change is UI-neutral. Capture the same route before and after at a fixed viewport, then diff the PNGs.
+
+1. Start the plain-HTTP dev server: `npm exec vite -- --config vite.screenshot.config.ts` (port 5337).
+2. `preview_open` with `open=false` (a background tab; a visible preview panel returns scaled captures), `preview_resize` to a freeform viewport (`1280x800` desktop, `390x844` mobile), navigate, wait ~3 s for images, then `preview_snapshot` with `save=true, includeImage=false` and copy the returned `screenshotPath`.
+3. Diff with sharp. The script used for Phase 2 (`/tmp/opencode/diff-preload.mjs`) reads `/tmp/opencode/shots/preload-before` and `.../after`, compares every PNG with `ensureAlpha().raw()`, and reports `diffPix`, percent, `maxDelta`, `avgDelta`, and the bounding box at a per-pixel threshold of 2.
+
+Expected noise floor: `diffPix=0` (or a handful of pixels with `maxDelta <= 1`) is clean. The Phase 1 comparison showed ~0.28% of pixels changed on glyph edges (grayscale vs LCD subpixel AA) with the bounding box inside the sidebar nav; that is expected and not a layout or color change. `preview_open`/`preview_resize`/`preview_snapshot` are the tools available in this environment; `/tmp/opencode` holds the earlier scripts if it survived.
 
 ## Open decisions for the owner
 
