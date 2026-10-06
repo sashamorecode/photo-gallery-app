@@ -27,12 +27,12 @@
     {/if}
 
     <div class="overflow-hidden rounded-xl border border-gray-700 bg-gray-900">
-        <div class="relative">
+        <div class="relative bg-black">
             {#if value}
                 <img
                     src={value}
                     alt={label}
-                    class="w-full {heightClass} object-cover"
+                    class="w-full {heightClass} object-contain"
                     loading="lazy"
                     draggable="false"
                 />

@@ -18,12 +18,12 @@
             </h1>
             <div class="overflow-hidden p-4 pt-0 lg:pl-0"> <div class="flex flex-col mb-8">
                     <div
-                        class="w-full max-h-1/2 px-8 pt-16 lg:pt-0 lg:w-1/4 lg:px-0 m-auto mb-6"
+                        class="w-full px-8 pt-16 lg:pt-0 lg:w-1/4 lg:px-0 m-auto mb-6"
                     >
                         <img
                             src={bio.image}
                             alt="Jonas Portrait"
-                            class=" rounded-lg shadow-lg p-auto"
+                            class="w-full h-auto object-contain rounded-lg shadow-lg"
                         />
                     </div>
                     <div class="w-full lg:w-1/3 m-auto text-xl font-[300]">
