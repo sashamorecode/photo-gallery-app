@@ -17,9 +17,15 @@
         <!-- News Grid -->
         <div id="news-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- News Item 1 -->
-            {#each entries as { coverImage, title, date, url, newsType }}
+            {#each entries as { coverImage, title, date, url, newsType, coverWidth, coverHeight, coverSrcset, coverSizes }, i}
                 <NewsEntry
                     {coverImage}
+                    {coverWidth}
+                    {coverHeight}
+                    {coverSrcset}
+                    {coverSizes}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    fetchpriority={i === 0 ? "high" : "low"}
                     newsTitle={title}
                     {newsType}
                     newsDate={date}

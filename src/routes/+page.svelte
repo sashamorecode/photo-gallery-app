@@ -3,14 +3,31 @@
     import { Carousel, Controls, CarouselIndicators } from "flowbite-svelte";
     import ControlButton from "flowbite-svelte/ControlButton.svelte";
     let { data } = $props();
-    const images = $state(data.homepage_images);
+    const images = $state(
+        data.homepage_images.map((image) => ({
+            src: image.src,
+            srcset: image.srcset,
+            sizes: image.sizes,
+            width: image.width,
+            height: image.height,
+            decoding: "async",
+            fetchpriority: "high",
+        })),
+    );
     console.log(images);
     let imageIdx = $state(0);
 </script>
 
 <svelte:head>
     {#if images[0]}
-        <link rel="preload" as="image" fetchpriority="high" href={images[0].src} />
+        <link
+            rel="preload"
+            as="image"
+            fetchpriority="high"
+            href={images[0].src}
+            imagesrcset={images[0].srcset}
+            imagesizes={images[0].sizes}
+        />
     {/if}
 </svelte:head>
 

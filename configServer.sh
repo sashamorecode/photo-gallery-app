@@ -173,8 +173,8 @@ server {
 }
 
 server {
-    listen [::]:443 ssl ipv6only=on;
-    listen 443 ssl;
+    listen [::]:443 ssl http2 ipv6only=on;
+    listen 443 ssl http2;
 
     ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
@@ -185,6 +185,14 @@ server {
 
     # ⚠️  Must match BODY_SIZE_LIMIT in the systemd service (currently ${MAX_UPLOAD_MB}M)
     client_max_body_size ${MAX_UPLOAD_MB}M;
+
+    # Compress proxied responses (SSR HTML) and static text assets.
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml application/json application/javascript application/xml+rss application/atom+xml image/svg+xml;
 
     location / {
         proxy_pass            http://127.0.0.1:3000;

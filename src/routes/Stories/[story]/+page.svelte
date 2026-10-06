@@ -32,7 +32,14 @@
 
 <svelte:head>
     {#if thisEntry?.images?.[0]}
-        <link rel="preload" as="image" fetchpriority="high" href={thisEntry.images[0].src} />
+        <link
+            rel="preload"
+            as="image"
+            fetchpriority="high"
+            href={thisEntry.images[0].src}
+            imagesrcset={thisEntry.images[0].srcset}
+            imagesizes={thisEntry.images[0].sizes}
+        />
     {/if}
 </svelte:head>
 <Navbar />

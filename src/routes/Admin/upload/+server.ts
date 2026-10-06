@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { basename, parse, resolve } from "node:path";
 import sharp from "sharp";
+import { ensureImageVariants } from "$lib/server/imageVariants.js";
 
 const MAX_WIDTH = 1920;
 const MAX_HEIGHT = 1080;
@@ -87,6 +88,13 @@ export async function POST({ request }) {
     }
 
     await writeFile(outputPath, new Uint8Array(processedImage));
+
+    // Generate responsive WebP derivatives (best effort; never fail the upload).
+    try {
+        await ensureImageVariants(outputPath);
+    } catch (error: unknown) {
+        console.error("Failed to generate image variants", error);
+    }
 
     return json({
         success: true,

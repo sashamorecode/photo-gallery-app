@@ -1,6 +1,7 @@
-import { access, readFile } from "node:fs/promises";
-import { constants } from "node:fs";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
+import { Readable } from "node:stream";
 
 const UPLOADS_ROOT = resolve(process.env.UPLOADS_DIR ?? resolve(process.cwd(), "static", "uploads"));
 
@@ -32,11 +33,13 @@ function resolveUploadPath(routePath: string): string | null {
 	return absolutePath;
 }
 
-function buildHeaders(filePath: string) {
+function buildHeaders(filePath: string, size: number) {
 	const contentType = MIME_BY_EXT[extname(filePath).toLowerCase()] ?? "application/octet-stream";
 	return {
 		"Content-Type": contentType,
-		"Cache-Control": "no-cache, no-store, must-revalidate"
+		"Content-Length": String(size),
+		// Uploads are content-addressed (UUID file names), so they never change.
+		"Cache-Control": "public, max-age=31536000, immutable"
 	};
 }
 
@@ -46,23 +49,27 @@ async function serveUploadedFile(pathParam: string, method: "GET" | "HEAD") {
 		return new Response("Not Found", { status: 404 });
 	}
 
+	let info;
 	try {
-		await access(filePath, constants.R_OK);
+		info = await stat(filePath);
 	} catch {
+		return new Response("Not Found", { status: 404 });
+	}
+	if (!info.isFile()) {
 		return new Response("Not Found", { status: 404 });
 	}
 
 	if (method === "HEAD") {
 		return new Response(null, {
 			status: 200,
-			headers: buildHeaders(filePath)
+			headers: buildHeaders(filePath, info.size)
 		});
 	}
 
-	const data = await readFile(filePath);
-	return new Response(data, {
+	const stream = Readable.toWeb(createReadStream(filePath)) as ReadableStream;
+	return new Response(stream, {
 		status: 200,
-		headers: buildHeaders(filePath)
+		headers: buildHeaders(filePath, info.size)
 	});
 }
 

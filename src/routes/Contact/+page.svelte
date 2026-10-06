@@ -17,7 +17,7 @@
     <div
         class="overflow-hidden p-4 max-w-lg m-auto lg:fixed lg:p-8 lg:w-full lg:ml-[25%]"
     >
-        <h1 class="text-4xl mb:text-3xl text-center font-[300] pb-4">
+        <h1 class="text-4xl md:text-3xl text-center font-[300] pb-4">
             Message Me
         </h1>
         <form

@@ -4,24 +4,28 @@ Whoever picks this up: the render-blocking work is done, but two pages still loa
 
 ## Next agent: start here
 
-**State as of commit `010cf69`.** Phase 1 (remove render-blocking CDN assets) and Phase 2 (server-render the LCP preload) are committed. The working tree is clean except for the intentionally untracked `vite.screenshot.config.ts` (plain-HTTP preview config, keep it). Render-blocking audits are clean and `lcp-discovery-insight` is now 1 on home and story detail.
+**State as of commit `010cf69` plus the uncommitted Phase 3 work described below.** Phase 1 (remove render-blocking CDN assets), Phase 2 (server-render the LCP preload) and Phase 3 (responsive WebP images, Stories CLS/LCP, upload caching, dead-weight cleanup) are done. The working tree is clean except for the intentionally untracked `vite.screenshot.config.ts` (plain-HTTP preview config, keep it).
 
-**What is actually left.** Page weight and image bytes, not discovery. Phase 2 removed ~620 KiB per load but did not move LCP, because the hero was already discoverable in the initial HTML. Home mobile now transfers ~415 KiB at perf ~91; the LCP element is still a 300+ KiB JPEG. `/Stories` (the list page) is the biggest single win and is untouched.
+**What is actually left.** Home, `/Stories`, story detail and `/News` are all in the 96–99 range on mobile now; the LCP element is a 30–80 KiB WebP instead of a 200–340 KiB JPEG. The remaining opportunities are small and mostly server-side: SSR HTML is still uncompressed in the lab (nginx gzip was added to `configServer.sh` but cannot be measured locally), `render-blocking-insight` flags the ~20 KiB of CSS SvelteKit injects, and the image pipeline could shave another ~100 ms with per-DPR variants. `/Stories` no longer needs work.
 
-**Do these next, in payoff order:**
+**What Phase 3 changed, in payoff order:**
 
-| # | Task | Where | Expected |
+| # | Task | Where | Result |
 |---|---|---|---|
-| 1 | Fix `/Stories` CLS + LCP: give the four covers `width`/`height` (or an aspect-ratio box), lazy-load all but the first, preload the first | `src/routes/Stories/+page.svelte:21-25` | +30 pts, CLS 0.559 → ~0 |
-| 2 | Hero `<img>` attributes: `fetchpriority="high"`, `decoding="async"`, intrinsic dimensions. Flowbite's `Slide` does not forward attributes, so add a custom `slide` snippet or a wrapper | `src/routes/+page.svelte:35`, `src/routes/Stories/[story]/+page.svelte:58` | small |
-| 3 | Serve smaller images: WebP/AVIF plus responsive `srcset`/`<picture>` from the upload pipeline | `src/routes/Admin/upload/+server.ts` | 243+ KiB, the real LCP win |
-| 4 | Cache `/uploads`: send `public, max-age=31536000, immutable` (filenames are content-addressed UUIDs) and stream instead of buffering | `src/routes/uploads/[...file]/+server.ts:39` | repeat-visit |
-| 5 | Compress SSR HTML and enable HTTP/2 in nginx | `configServer.sh:167-198` | TTFB |
-| 6 | Delete ~21 MB of dead legacy images, drop unused `@tailwindcss/typography`, fix the `mb:text-3xl` typo | `build/client`, `src/app.css`, `src/routes/Contact/+page.svelte:20` | bundle |
+| 1 | `/Stories` CLS + LCP: intrinsic dimensions, lazy-load below the fold, `fetchpriority`, preload first | `src/routes/Stories/+page.svelte:17` | Perf 70 → 97, CLS 0.134 → 0, LCP 7.95 s → 2.55 s |
+| 2 | Hero `<img>` attributes: `fetchpriority`, `decoding`, dimensions, responsive `srcset` | `src/routes/+page.svelte`, `src/routes/Stories/[story]/+page.svelte` | Home LCP 3.46 → 2.41 s |
+| 3 | Responsive WebP variants (480/768/960/1440/1920) plus `srcset`/`sizes` | `src/lib/server/imageVariants.js`, `scripts/generate-image-variants.mjs`, page loaders | Home 415 → 171 KiB, Stories 1231 → 483 KiB |
+| 4 | Cache `/uploads` immutably and stream it | `src/routes/uploads/[...file]/+server.ts` | `cache-insight` 0 → 1 |
+| 5 | nginx gzip + HTTP/2 (config only, not lab-measurable) | `configServer.sh:175` | TTFB |
+| 6 | Delete ~24 MB dead legacy images, drop `@tailwindcss/typography`, fix `mb:text-3xl`, stop copying uploads into the build | `static/`, `src/app.css`, `package.json`, `scripts/strip-build-uploads.mjs` | Build output 119 MB → 2.4 MB |
+
+**Two things to run in production after this ships:**
+- `npm run images:variants` once, to backfill WebP derivatives for images uploaded before this change. It is idempotent. The app falls back to originals when a derivative is missing, so skipping it is safe but gives up the byte savings.
+- `sudo bash configServer.sh` (or just re-run the nginx step) so the new `gzip`/`http2` directives take effect.
 
 Full descriptions and line references are in "Next steps, in order" below. Read "Constraints and traps" before touching `src/app.css` or the hero offset.
 
-**Verify every change the same way Phase 2 was verified:** capture `/` and a story detail route before and after, on a background preview tab, at 1280x800 and 390x844, then diff with sharp. Expect 0 changed pixels above the noise floor. Details in "Visual verification harness".
+**Verify every change the same way Phase 3 was verified:** capture `/`, `/Stories`, a story detail and `/News` before and after, on a background preview tab, at 1280x800 and 390x844, then diff with sharp. Pixel diffs inside image regions are expected when the served image changes; element bounding boxes must be identical. Details in "Visual verification harness".
 
 ## Baseline numbers
 
@@ -134,6 +138,58 @@ The perf score and LCP did not move. The LCP image was already discoverable in t
 
 UI was verified unchanged: viewport captures of `/`, `/Stories/Construction` on desktop (1280x800) and mobile (390x844) before and after the change diff to 0 changed pixels above the noise floor (`maxDelta <= 1`).
 
+## What changed (Phase 3) — responsive images and page fixes
+
+Measured on the same machine and harness as the baseline (production build, Lighthouse 13, mobile throttling). "Baseline" is the pre-Phase-3 build; "after" is the Phase 3 build.
+
+| Page | Perf | LCP | Total KiB | Img KiB |
+|---|---|---|---|---|
+| `/` baseline | 91 | 3.46 s | 415 | 300 |
+| `/` after | **97** | **2.41 s** | **171** | **45** |
+| `/Stories` baseline | 70 | 7.95 s | 1231 | 1147 |
+| `/Stories` after | **97** | **2.55 s** | **483** | **394** |
+| `/Stories/Construction` baseline | 84 | 4.35 s | 578 | 454 |
+| `/Stories/Construction` after | **96** | **2.56 s** | **214** | **82** |
+| `/News` baseline | 96 | 2.70 s | 245 | 167 |
+| `/News` after | **99** | **2.10 s** | **111** | **30** |
+
+`/Stories` CLS went 0.134 → 0. `cache-insight` is 1 on every page. `image-delivery-insight` is 1 on home and news; on `/Stories` and story detail it still reports ~150 ms of LCP savings because the browser picks the 768 px derivative for a 665 px slot (see below).
+
+### Responsive image pipeline
+
+`src/lib/server/imageVariants.js` writes WebP derivatives at widths 480/768/960/1440/1920 for every uploaded raster image, skipping widths at or above the original. `src/routes/Admin/upload/+server.ts` calls `ensureImageVariants` after each upload; `scripts/generate-image-variants.mjs` (`npm run images:variants`) backfills the rest. Derivatives are named `<stem>-<width>.webp` next to the original.
+
+On the read side, `src/lib/server/responsiveImages.js` exposes `withResponsive`/`withResponsiveAll`. They read intrinsic dimensions via `sharp` (`src/lib/server/imageMeta.js`, cached per path), attach `width`/`height`, and build a `srcset` from whichever derivatives actually exist on disk, with the original as the largest candidate. The page `+page.server.js` loaders attach these attributes, and the components spread them onto the `<img>`. Flowbite's `Slide` spreads the `image` object it is given, so `srcset`/`sizes`/`fetchpriority`/`decoding` pass straight through the carousel with no wrapper.
+
+Because `withResponsive` checks for the file, the app degrades to the original image when a derivative is missing — no broken images if the backfill has not run.
+
+### Preload carries the srcset
+
+Every preload that points at an image now also emits `imagesrcset` and `imagesizes`, so the browser preloads the same derivative the `<img>` will choose instead of the original:
+
+```svelte
+<link rel="preload" as="image" fetchpriority="high"
+  href={image.src} imagesrcset={image.srcset} imagesizes={image.sizes} />
+```
+
+### `/uploads` caching and streaming
+
+`src/routes/uploads/[...file]/+server.ts` now sends `public, max-age=31536000, immutable` (safe: file names are UUIDs) plus `Content-Length`, and streams the file with `Readable.toWeb(createReadStream(...))` instead of buffering it into memory.
+
+There is a trap here worth remembering: SvelteKit copies the whole `static/` directory into `build/client`, and adapter-node serves files that exist there **before** the router runs. That meant `/uploads/*` was being served by the static handler with no cache headers, shadowing the route entirely. `scripts/strip-build-uploads.mjs` (run at the end of `npm run build`) deletes `build/client/uploads`, which both fixes the header and removes a redundant 147 MB from the build. `build/client` went from 119 MB to 2.4 MB.
+
+### Stories page
+
+`src/routes/Stories/+page.svelte` gives each cover `width`/`height`, a `srcset`, `loading="lazy"` for everything below the first, and `fetchpriority="high"` on the first. A server-rendered preload for the first cover carries the `srcset`. The `width`/`height` reserve the aspect ratio, which is what removed the CLS.
+
+### Cleanup
+
+Deleted 14 tracked, unreferenced legacy images from `static/` (~24 MB), dropped the unused `@tailwindcss/typography` plugin from `src/app.css` and `package.json`, and fixed `mb:text-3xl` → `md:text-3xl` in `src/routes/Contact/+page.svelte:20`. That last one is a deliberate, visible change at the `md` breakpoint; everything else is UI-neutral.
+
+### UI verification
+
+Viewport captures of `/`, `/Stories`, `/Stories/Construction` and `/News` at 1280x800 and 390x844. Element bounding boxes for `img/h1/h2/h3/button` are byte-identical before and after on `/Stories` (mobile), `/Stories/Construction` (mobile) and `/` (desktop). Pixel diffs are confined to image rectangles and are the expected result of re-encoding at quality 75; side-by-side inspection shows them as visually identical.
+
 ## Constraints and traps
 
 **Do not delete the `@source` line in `src/app.css`.** Tailwind v4 does not scan `node_modules`, so Flowbite's own classes (`sr-only`, `rounded-full`, `bg-white/30`, the indicator dots) were only ever generated at runtime by the Play CDN. Remove the `@source` and the carousel controls and dots break.
@@ -166,13 +222,19 @@ export default defineConfig({
 
 ## Next steps, in order
 
-1. ~~**Fix the hero preload (home and story detail).**~~ **Done (Phase 2).** Server-rendered `fetchpriority="high"` preload for the first slide on both pages. `lcp-discovery-insight` 0 → 1 and ~620 KiB less transferred, but LCP unchanged. See "What changed (Phase 2)".
-2. **Give the LCP image `fetchpriority="high"`, `decoding="async"`, and dimensions.** Flowbite's `Slide` does not forward attributes, so a custom slide snippet or a wrapper is the likely route. The hero lives in `src/routes/+page.svelte:35`.
-3. **Fix Stories CLS and LCP.** Add `width`/`height` or an aspect-ratio box to the covers in `src/routes/Stories/+page.svelte:21-25`, lazy-load everything below the first, and preload the first. That page alone is worth 30+ points.
-4. **Serve smaller images.** Uploaded images are capped at 1920x1080 and re-encoded, but served at full size (`src/routes/Admin/upload/+server.ts`). Generate WebP/AVIF and responsive widths, then use `srcset`/`<picture>`. The audit estimates 243 KiB savings on home alone.
-5. **Add caching for `/uploads`.** `src/routes/uploads/[...file]/+server.ts:39` sends `no-cache, no-store, must-revalidate` and reads the whole file into memory. Filenames are content-addressed UUIDs, so `public, max-age=31536000, immutable` is safe.
-6. **Compress SSR responses and enable HTTP/2.** adapter-node precompresses static assets, but SSR HTML goes out uncompressed and nginx has no `gzip`/`brotli` and no `http2` (`configServer.sh:167-198`).
-7. **Clean up dead weight.** Around 21 MB of unreferenced legacy images still ship in `build/client`, including `HomePageImage.jpg` at 13.8 MB. Also `@tailwindcss/typography` is loaded but unused, and there is a `mb:text-3xl` typo in `src/routes/Contact/+page.svelte:20`.
+1. ~~**Fix the hero preload (home and story detail).**~~ **Done (Phase 2).**
+2. ~~**Give the LCP image `fetchpriority="high"`, `decoding="async"`, and dimensions.**~~ **Done (Phase 3).** Attributes ride through Flowbite's `Slide` via the `image` object spread.
+3. ~~**Fix Stories CLS and LCP.**~~ **Done (Phase 3).** 70 → 97, CLS 0.134 → 0.
+4. ~~**Serve smaller images.**~~ **Done (Phase 3).** Responsive WebP derivatives plus `srcset`/`sizes`. `npm run images:variants` backfills older uploads.
+5. ~~**Add caching for `/uploads`.**~~ **Done (Phase 3).** Immutable `Cache-Control` and streaming; `cache-insight` 0 → 1.
+6. **Compress SSR responses and enable HTTP/2.** nginx `gzip`/`http2` directives were added to `configServer.sh` but are not measurable in the local lab. Re-run the provisioning step to apply them on the server. This is the remaining `document-latency-insight` failure (`usesCompression`).
+7. ~~**Clean up dead weight.**~~ **Done (Phase 3).** Deleted ~24 MB of legacy images, dropped `@tailwindcss/typography`, fixed the `mb:text-3xl` typo, and stopped copying `static/uploads` into `build/client` (119 MB → 2.4 MB).
+
+**Remaining, smaller wins if someone wants to keep going:**
+
+- **Per-DPR variants.** The browser picks the 768 px derivative for a ~665 px slot on `/Stories`, so `image-delivery-insight` still estimates ~150 ms of LCP savings there. Adding widths that land closer to common DPR targets (e.g. 704) would close it, at the cost of more derivative files.
+- **Render-blocking CSS.** `render-blocking-insight` scores 0 on the ~20 KiB of CSS SvelteKit injects (`0.*.css`, `theme.*.css`, `Navbar.*.css`). Inlining critical CSS or deferring the Navbar stylesheet would recover ~300 ms of simulated render delay.
+- **AVIF.** The derivatives are WebP. AVIF would cut another ~20–30% on the same pixels but needs a `<picture>` fallback and is slower to encode.
 
 ## Visual verification harness
 

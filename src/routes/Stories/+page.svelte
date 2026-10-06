@@ -5,6 +5,19 @@
   console.log(storys);
 </script>
 
+<svelte:head>
+  {#if storys[0]?.coverImage}
+    <link
+      rel="preload"
+      as="image"
+      fetchpriority="high"
+      href={storys[0].coverImage}
+      imagesrcset={storys[0].coverSrcset}
+      imagesizes={storys[0].coverSizes}
+    />
+  {/if}
+</svelte:head>
+
 <Navbar />
 <div class="w-full h-full overflow-y-auto pb-12 lg:pb-0">
   <h1
@@ -14,13 +27,20 @@
   </h1>
   <div class="pt-20 lg:pt-20 mx-auto grid grid-cols-1 gap-6 p-4 lg:pl-0">
     <!-- Story Items -->
-    {#each storys as { coverImage, title, url, alt }}
+    {#each storys as { coverImage, title, url, alt, coverWidth, coverHeight, coverSrcset, coverSizes }, i}
       <a href="/Stories/{url}" data-sveltekit-preload-data>
         <div class="block story-item mx-auto" data-story="1">
           <div class="relative w-full lg:w-3/4 cursor-pointer group lg:mx-auto">
             <img
               src={coverImage}
               {alt}
+              width={coverWidth}
+              height={coverHeight}
+              srcset={coverSrcset}
+              sizes={coverSizes}
+              loading={i === 0 ? "eager" : "lazy"}
+              fetchpriority={i === 0 ? "high" : "low"}
+              decoding="async"
               class="max-w-full h-auto max-h-[75vh] object-contain rounded-lg transition-transform lg:group-hover:scale-[101%] mx-auto"
             />
             <h1

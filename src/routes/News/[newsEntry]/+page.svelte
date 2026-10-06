@@ -56,6 +56,11 @@
                                 <img
                                     src={image.src}
                                     alt={image.alt}
+                                    width={image.width}
+                                    height={image.height}
+                                    srcset={image.srcset}
+                                    sizes={image.sizes}
+                                    decoding="async"
                                     class="w-full h-full rounded-lg object-contain"
                                 />
                             </div>
