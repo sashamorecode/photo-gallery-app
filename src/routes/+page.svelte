@@ -2,20 +2,29 @@
     import Navbar from "$lib/Navbar.svelte";
     import { Carousel, Controls, CarouselIndicators } from "flowbite-svelte";
     import ControlButton from "flowbite-svelte/ControlButton.svelte";
+    import { deferIdle, warmImage, warmWithTimeout } from "$lib/imageWarm.js";
     let { data } = $props();
     const images = $state(
-        data.homepage_images.map((image) => ({
+        data.homepage_images.map((image, i) => ({
             src: image.src,
             srcset: image.srcset,
             sizes: image.sizes,
             width: image.width,
             height: image.height,
             decoding: "async",
-            fetchpriority: "high",
+            fetchpriority: i === 0 ? "high" : "low",
         })),
     );
-    console.log(images);
     let imageIdx = $state(0);
+
+    $effect(() => {
+        const idx = imageIdx;
+        const neighbours = [images[idx - 1], images[idx + 1]].filter(Boolean);
+        if (neighbours.length === 0) return;
+        return deferIdle(() => {
+            for (const image of neighbours) warmImage(image);
+        });
+    });
 </script>
 
 <svelte:head>
@@ -52,11 +61,11 @@
                 <Controls>
                     {#snippet children(changeSlide)}
                         <ControlButton name="Previous" forward={false}
-                            onclick={() => { if (imageIdx > 0) changeSlide(false); }}
+                            onclick={() => { if (imageIdx > 0) warmWithTimeout(images[imageIdx - 1]).then(() => changeSlide(false)); }}
                             class={imageIdx === 0 ? "opacity-30 !cursor-not-allowed" : ""}
                         />
                         <ControlButton name="Next" forward={true}
-                            onclick={() => { if (imageIdx < images.length - 1) changeSlide(true); }}
+                            onclick={() => { if (imageIdx < images.length - 1) warmWithTimeout(images[imageIdx + 1]).then(() => changeSlide(true)); }}
                             class={imageIdx === images.length - 1 ? "opacity-30 !cursor-not-allowed" : ""}
                         />
                     {/snippet}

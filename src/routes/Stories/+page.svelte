@@ -1,8 +1,25 @@
 <script>
   import Navbar from "$lib/Navbar.svelte";
+  import { preloadData } from "$app/navigation";
+  import { isSaveData, warmImage } from "$lib/imageWarm.js";
   let { data } = $props();
   let storys = data.stories;
-  console.log(storys);
+
+  /** @param {string} url */
+  async function warmStory(url) {
+    if (isSaveData()) return;
+    try {
+      const result = await preloadData(`/Stories/${url}`);
+      if (result.type !== "loaded") return;
+      const story = Array.isArray(result.data?.stories)
+        ? result.data.stories.find(/** @param {{ url: string }} s */ (s) => s.url === url)
+        : undefined;
+      const first = story?.images?.[0];
+      if (first) warmImage(first);
+    } catch {
+      // preloading/warming is best-effort; ignore failures
+    }
+  }
 </script>
 
 <svelte:head>
@@ -28,7 +45,11 @@
   <div class="pt-20 lg:pt-20 mx-auto grid grid-cols-1 gap-6 p-4 lg:pl-0">
     <!-- Story Items -->
     {#each storys as { coverImage, title, url, alt, coverWidth, coverHeight, coverSrcset, coverSizes }, i}
-      <a href="/Stories/{url}" data-sveltekit-preload-data>
+      <a href="/Stories/{url}" data-sveltekit-preload-data
+        onpointerenter={() => warmStory(url)}
+        onfocus={() => warmStory(url)}
+        ontouchstart={() => warmStory(url)}
+      >
         <div class="block story-item mx-auto" data-story="1">
           <div class="relative w-full lg:w-3/4 cursor-pointer group lg:mx-auto">
             <img

@@ -1,4 +1,6 @@
 <script>
+    import { preloadData } from "$app/navigation";
+    import { isSaveData, warmImage } from "$lib/imageWarm.js";
     let {
         coverImage,
         coverWidth,
@@ -12,8 +14,28 @@
         newsDate,
         newsUrl,
     } = $props();
+
+    /** @param {string} url */
+    async function warmNews(url) {
+        if (isSaveData()) return;
+        try {
+            const result = await preloadData(`/News/${url}`);
+            if (result.type !== "loaded") return;
+            const entry = Array.isArray(result.data?.news)
+                ? result.data.news.find(/** @param {{ url: string }} n */ (n) => n.url === url)
+                : undefined;
+            const first = entry?.images?.[0];
+            if (first) warmImage(first);
+        } catch {
+            // preloading/warming is best-effort; ignore failures
+        }
+    }
 </script>
-<a href={"/News/"+newsUrl}>
+<a href={"/News/"+newsUrl}
+    onpointerenter={() => warmNews(newsUrl)}
+    onfocus={() => warmNews(newsUrl)}
+    ontouchstart={() => warmNews(newsUrl)}
+>
 <div class="news-item cursor-pointer group" data-news="1">
     <img
         src={coverImage}

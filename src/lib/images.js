@@ -3,7 +3,7 @@
 export const UPLOADS_PREFIX = "/uploads/";
 
 /** Widths generated as WebP derivatives of every uploaded image. */
-export const VARIANT_WIDTHS = [480, 768, 960, 1440, 1920];
+export const VARIANT_WIDTHS = [480, 704, 768, 960, 1440, 1920];
 
 /** @param {string} src */
 export function isUploadSrc(src) {

@@ -3,13 +3,13 @@
     import Navbar from "$lib/Navbar.svelte";
     import { Carousel, Controls, CarouselIndicators } from "flowbite-svelte";
     import ControlButton from "flowbite-svelte/ControlButton.svelte";
+    import { deferIdle, warmImage, warmWithTimeout } from "$lib/imageWarm.js";
     let { data } = $props();
-    let storys = data.stories;
 
-    let entryUrl = $page.params.story;
-    console.log(entryUrl);
-    let thisEntry = storys.find(
-        /** @param {{ url: string }} entry */ (entry) => entry.url === entryUrl,
+    let thisEntry = $derived(
+        data.stories.find(
+            /** @param {{ url: string }} entry */ (entry) => entry.url === $page.params.story,
+        ),
     );
 
     // Carousel Modal State
@@ -17,6 +17,24 @@
     let imageIdx = $state(0);
 
     let image = $state();
+
+    // Reset the carousel when navigating between stories (component is reused).
+    $effect(() => {
+        void $page.params.story;
+        imageIdx = 0;
+    });
+
+    $effect(() => {
+        const entry = thisEntry;
+        const idx = imageIdx;
+        const neighbours = entry?.images
+            ? [entry.images[idx - 1], entry.images[idx + 1]].filter(Boolean)
+            : [];
+        if (neighbours.length === 0) return;
+        return deferIdle(() => {
+            for (const image of neighbours) warmImage(image);
+        });
+    });
 
     /** @param {number} idx */
     function openCarousel(idx) {
@@ -73,11 +91,11 @@
                 <Controls>
                     {#snippet children(changeSlide)}
                         <ControlButton name="Previous" forward={false}
-                            onclick={() => { if (imageIdx > 0) changeSlide(false); }}
+                            onclick={() => { if (imageIdx > 0) warmWithTimeout(thisEntry.images[imageIdx - 1]).then(() => changeSlide(false)); }}
                             class={imageIdx === 0 ? "opacity-30 !cursor-not-allowed" : ""}
                         />
                         <ControlButton name="Next" forward={true}
-                            onclick={() => { if (imageIdx < thisEntry.images.length - 1) changeSlide(true); }}
+                            onclick={() => { if (imageIdx < thisEntry.images.length - 1) warmWithTimeout(thisEntry.images[imageIdx + 1]).then(() => changeSlide(true)); }}
                             class={imageIdx === thisEntry.images.length - 1 ? "opacity-30 !cursor-not-allowed" : ""}
                         />
                     {/snippet}
