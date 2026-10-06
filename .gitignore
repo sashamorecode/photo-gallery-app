@@ -19,6 +19,7 @@ Thumbs.db
 !.env.test
 sql.db
 mydb.sqlite
+mydb.sqlite.bak-*
 my.sqlite
 static/
 # Vite
