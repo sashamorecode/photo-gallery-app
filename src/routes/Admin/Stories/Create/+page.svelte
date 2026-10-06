@@ -1,5 +1,9 @@
 <script lang="ts">
-    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+    import AdminField from "$lib/components/AdminField.svelte";
+    import AdminImageGrid from "$lib/components/AdminImageGrid.svelte";
+    import AdminImageUploader from "$lib/components/AdminImageUploader.svelte";
+    import AdminPage from "$lib/components/AdminPage.svelte";
+    import AdminSaveBar from "$lib/components/AdminSaveBar.svelte";
 
     const currentStory = $state({
         url: "",
@@ -7,20 +11,15 @@
         coverImage: "",
         images: [{ src: "", alt: "", title: "" }],
     });
-
-    function addImage(): void {
-        currentStory.images.push({ src: "", alt: "", title: "" });
-    }
-
-    function removeImage(index: number): void {
-        currentStory.images = currentStory.images.filter((_, i) => i !== index);
-    }
 </script>
 
-<a href="/Admin/Stories/">BACK</a>
-<div class="bg-gray-800 mx-auto overflow-y-scroll">
+<AdminPage
+    backHref="/Admin/Stories/"
+    title="Create Story"
+    description="Add a new story with a cover image and an ordered set of images."
+>
     <form
-        class="grid grid-cols-2 text-xl overflow-y-scroll"
+        class="mt-6 flex flex-col gap-6"
         onsubmit={(e) => {
             e.preventDefault();
             const res = fetch(`/Admin/Stories/Create`, {
@@ -48,83 +47,24 @@
             });
         }}
     >
-        <div class="flex flex-col">
-            <label>
-                Stories Page URL:
-                <input type="text" name="url" bind:value={currentStory.url} />
-            </label>
-            <label>
-                Stories Title:
-                <input
-                    type="text"
-                    name="title"
-                    bind:value={currentStory.title}
-                />
-            </label>
-            <AdminImageUploadField
-                label="Cover Image"
-                value={currentStory.coverImage}
-                setValue={(nextValue) => {
-                    currentStory.coverImage = nextValue;
-                }}
-            />
-            <button type="submit">Submit</button>
-        </div>
-        <div class="flex flex-col">
-            <h3>Images</h3>
-            {#each currentStory.images as image, index}
-                <div
-                    style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
-                >
-                    <AdminImageUploadField
-                        label="Image"
-                        value={currentStory.images[index].src}
-                        setValue={(nextValue) => {
-                            currentStory.images[index].src = nextValue;
-                        }}
-                    />
-                    <label>
-                        Alt:
-                        <input
-                            type="text"
-                            name={`images[${index}][alt]`}
-                            bind:value={currentStory.images[index].alt}
-                        />
-                    </label>
-                    <label>
-                        Title:
-                        <input
-                            type="text"
-                            name={`images[${index}][title]`}
-                            bind:value={currentStory.images[index].title}
-                        />
-                    </label>
-                    <button
-                        type="button"
-                        class="bg-red-500 rounded-lg p-1"
-                        onclick={() => removeImage(index)}>Remove</button
-                    >
-                </div>
-            {/each}
+        <AdminField label="Stories Page URL" bind:value={currentStory.url} />
+        <AdminField label="Stories Title" bind:value={currentStory.title} />
 
-            <button type="button" onclick={addImage}>+ Add Image</button>
-        </div>
+        <AdminImageUploader
+            label="Cover Image"
+            value={currentStory.coverImage}
+            setValue={(nextValue) => {
+                currentStory.coverImage = nextValue;
+            }}
+        />
+
+        <h2 class="mt-8 text-lg font-medium">Images</h2>
+        <AdminImageGrid
+            images={currentStory.images}
+            showMeta
+            addLabel="+ Add image"
+        />
+
+        <AdminSaveBar label="Submit" />
     </form>
-</div>
-
-<style>
-    label {
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: row;
-        height: 4em;
-        border-width: 1px;
-        border-color: gray;
-    }
-    button {
-        margin-top: 10px;
-    }
-    input {
-        width: 100%;
-    }
-</style>
+</AdminPage>

@@ -60,10 +60,21 @@ CREATE TABLE IF NOT EXISTS print_sizes (
     price TEXT,
     FOREIGN KEY (print_id) REFERENCES prints(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS bio (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    image TEXT,
+    text TEXT
+);
 `);
+
+const DEFAULT_BIO = {
+    image: "/portrait.jpg",
+    text: "Jonas Schledorn was born and raised around the Ruhr Area in Western Germany. After graduating from media school in 2021, he moved to cologne to study photography at the Fotoakademie-Koeln. He works within the social documentary practice, covering the struggles of everyday life. The goal is to create a connection to the subject which is based on eye level.",
+};
 //curd for homepage
 export function getHomepage() {
-    const homepage_images = db.prepare('SELECT * FROM homepage_images').all();
+    const homepage_images = db.prepare('SELECT * FROM homepage_images ORDER BY id').all();
     return homepage_images;
 } export function updateHompage(images ) {
     db.prepare('DELETE FROM homepage_images').run();
@@ -71,6 +82,22 @@ export function getHomepage() {
     for (const img of images) {
         imagesStmt.run(img.src);
     }
+}
+
+// ---------- CRUD for BIO ----------
+export function getBio() {
+    const row = db.prepare('SELECT image, text FROM bio WHERE id = 1').get();
+    return {
+        image: row?.image ?? DEFAULT_BIO.image,
+        text: row?.text ?? DEFAULT_BIO.text,
+    };
+}
+/** @param {{ image?: string | null, text?: string | null }} bio */
+export function updateBio(bio) {
+    db.prepare(`
+        INSERT INTO bio (id, image, text) VALUES (1, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET image = excluded.image, text = excluded.text
+    `).run(bio.image ?? null, bio.text ?? null);
 }
 
 

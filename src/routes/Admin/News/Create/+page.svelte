@@ -1,5 +1,9 @@
 <script lang="ts">
-    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+    import AdminField from "$lib/components/AdminField.svelte";
+    import AdminImageGrid from "$lib/components/AdminImageGrid.svelte";
+    import AdminImageUploader from "$lib/components/AdminImageUploader.svelte";
+    import AdminPage from "$lib/components/AdminPage.svelte";
+    import AdminSaveBar from "$lib/components/AdminSaveBar.svelte";
 
     const currentNews = $state({
         url: "",
@@ -10,20 +14,15 @@
         images: [{ src: "", alt: "", title: "" }],
         content: "",
     });
-
-    function addImage(): void {
-        currentNews.images.push({ src: "", alt: "", title: "" });
-    }
-
-    function removeImage(index: number): void {
-        currentNews.images = currentNews.images.filter((_, i) => i !== index);
-    }
 </script>
 
-<a href="/Admin/News/">BACK</a>
-<div class="bg-gray-800 mx-auto overflow-y-scroll">
+<AdminPage
+    backHref="/Admin/News/"
+    title="Create News Post"
+    description="Fill in the details below and add any images that should appear with the post."
+>
     <form
-        class="grid grid-cols-2 text-xl overflow-y-scroll"
+        class="mt-6 flex flex-col gap-6"
         onsubmit={(e) => {
             e.preventDefault();
             const res = fetch(`/Admin/News/Create`, {
@@ -46,7 +45,9 @@
                         currentNews.date = "";
                         currentNews.content = "";
                         currentNews.newsType = "";
-                        currentNews.images = [{ src: "", alt: "", title: "" }];
+                        currentNews.images = [
+                            { src: "", alt: "", title: "" },
+                        ];
                     } else {
                         alert("Error Occurred");
                     }
@@ -54,106 +55,37 @@
             });
         }}
     >
-        <div class="flex flex-col">
-            <label>
-                News Page URL:
-                <input type="text" name="url" bind:value={currentNews.url} />
-            </label>
-            <label>
-                News Title:
-                <input
-                    type="text"
-                    name="title"
-                    bind:value={currentNews.title}
-                />
-            </label>
-            <AdminImageUploadField
-                label="Cover Image"
-                value={currentNews.coverImage}
-                setValue={(nextValue) => {
-                    currentNews.coverImage = nextValue;
-                }}
-            />
-            <label>
-                Date Of Publication:
-                <input
-                    type="text"
-                    placeholder="15 - Mar - 2021"
-                    name="date"
-                    bind:value={currentNews.date}
-                />
-            </label>
-            <label>
-                News Type:
-                <input
-                    type="text"
-                    name="newsType"
-                    bind:value={currentNews.newsType}
-                />
-            </label>
-            <label>
-                News Content:
-                <textarea name="content" bind:value={currentNews.content}
-                ></textarea>
-            </label>
-            <button type="submit">Submit</button>
-        </div>
-        <div class="flex flex-col">
-            <h3>Images</h3>
-            {#each currentNews.images as image, index}
-                <div
-                    style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
-                >
-                    <AdminImageUploadField
-                        label="Image"
-                        value={currentNews.images[index].src}
-                        setValue={(nextValue) => {
-                            currentNews.images[index].src = nextValue;
-                        }}
-                    />
-                    <label>
-                        Alt:
-                        <input
-                            type="text"
-                            name={`images[${index}][alt]`}
-                            bind:value={currentNews.images[index].alt}
-                        />
-                    </label>
-                    <label>
-                        Title:
-                        <input
-                            type="text"
-                            name={`images[${index}][title]`}
-                            bind:value={currentNews.images[index].title}
-                        />
-                    </label>
-                    <button
-                        type="button"
-                        class="bg-red-500 rounded-lg p-1"
-                        onclick={() => removeImage(index)}>Remove</button
-                    >
-                </div>
-            {/each}
+        <AdminField label="News Page URL" bind:value={currentNews.url} />
+        <AdminField label="News Title" bind:value={currentNews.title} />
 
-            <button type="button" onclick={addImage}>+ Add Image</button>
-        </div>
+        <AdminImageUploader
+            label="Cover Image"
+            value={currentNews.coverImage}
+            setValue={(nextValue) => {
+                currentNews.coverImage = nextValue;
+            }}
+        />
+
+        <AdminField
+            label="Date Of Publication"
+            bind:value={currentNews.date}
+            placeholder="15 - Mar - 2021"
+        />
+        <AdminField label="News Type" bind:value={currentNews.newsType} />
+        <AdminField
+            label="News Content"
+            bind:value={currentNews.content}
+            multiline
+            rows={10}
+        />
+
+        <h2 class="mt-8 text-lg font-medium">Images</h2>
+        <AdminImageGrid
+            images={currentNews.images}
+            showMeta
+            addLabel="+ Add image"
+        />
+
+        <AdminSaveBar label="Submit" />
     </form>
-</div>
-
-<style>
-    label {
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: row;
-        height: 4em;
-        border-width: 1px;
-        border-color: gray;
-    }
-    button {
-        margin-top: 10px;
-    }
-    input,
-    textarea {
-        width: 100%;
-    }
-</style>
+</AdminPage>

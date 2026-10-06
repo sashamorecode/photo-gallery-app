@@ -1,5 +1,8 @@
 <script>
     import Navbar from "$lib/Navbar.svelte";
+
+    let { data } = $props();
+    const bio = data.bio;
 </script>
 
 <div
@@ -18,23 +21,16 @@
                         class="w-full max-h-1/2 px-8 pt-16 lg:pt-0 lg:w-1/4 lg:px-0 m-auto mb-6"
                     >
                         <img
-                            src="./portrait.jpg"
+                            src={bio.image}
                             alt="Jonas Portrait"
                             class=" rounded-lg shadow-lg p-auto"
                         />
                     </div>
                     <div class="w-full lg:w-1/3 m-auto text-xl font-[300]">
                         <p
-                            class="mb-4 text-gray-300 leading-relaxed text-center"
+                            class="mb-4 text-gray-300 leading-relaxed text-center whitespace-pre-line"
                         >
-                            Jonas Schledorn was born and raised around the Ruhr
-                            Area in Western Germany. After graduating from media
-                            school in 2021, he moved to cologne to study
-                            photography at the Fotoakademie-Koeln. He works
-                            within the social documentary practice, covering the
-                            struggles of everyday life. The goal is to create a
-                            connection to the subject which is
-                            based on eye level.
+                            {bio.text}
                         </p>
                     </div>
                 </div>

@@ -1,42 +1,27 @@
 <script lang="ts">
-    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+    import AdminField from "$lib/components/AdminField.svelte";
+    import AdminImageGrid from "$lib/components/AdminImageGrid.svelte";
+    import AdminImageUploader from "$lib/components/AdminImageUploader.svelte";
+    import AdminPage from "$lib/components/AdminPage.svelte";
+    import AdminSaveBar from "$lib/components/AdminSaveBar.svelte";
 
     let { data } = $props();
     let stories = $state(data.stories);
     let currentStory = $derived(stories[0]);
-    function addImage(): void {
-        currentStory.images = [
-            ...currentStory.images,
-            { src: "", alt: "", title: "" },
-        ];
-    }
+    let saving = $state(false);
+    let saved = $state(false);
 
-    function removeImage(index: number): void {
-        currentStory.images = currentStory.images.filter(
-            (_: unknown, i: number) => i !== index,
-        );
-    }
-</script>
+    async function handleSubmit(event: SubmitEvent) {
+        event.preventDefault();
+        if (saving) {
+            return;
+        }
 
-<a href="/Admin/Stories/">BACK</a>
-<div class="bg-gray-800 mx-auto overflow-y-scroll">
-    <p>Select Story Entry</p>
-    <select
-        class="text-white"
-        onchange={(event) => {
-            const target = event.target as HTMLSelectElement;
-            const idx = Number(target.value);
-            currentStory = stories[idx];
-        }}
-    >
-        {#each stories as news, idx}
-            <option class="text-red-400" value={idx}>{news.title}</option>
-        {/each}
-    </select>
-    <form
-        onsubmit={(e) => {
-            e.preventDefault();
-            const res = fetch(`/Admin/Stories/${currentStory.id}`, {
+        saving = true;
+        saved = false;
+
+        try {
+            const res = await fetch(`/Admin/Stories/${currentStory.id}`, {
                 method: "PUT",
                 headers: {
                     Accept: "application/json",
@@ -44,96 +29,74 @@
                 },
                 body: JSON.stringify(currentStory),
             });
-            res.then((r) => {
-                let jres = r.json();
-                jres.then((jsonRes) => {
-                    if (jsonRes.success) {
-                        alert("Updated Entry Sucessfully");
-                    } else {
-                        alert("Error Occured");
-                    }
-                });
-            });
-        }}
-        class="grid grid-cols-2 text-xl overflow-y-scroll"
-    >
-        <div class="flex flex-col">
-            <label>
-                Story Page URL:
-                <input type="text" name="url" bind:value={currentStory.url} />
-            </label>
-            <label>
-                Story Title:
-                <input
-                    type="text"
-                    name="title"
-                    bind:value={currentStory.title}
-                />
-            </label>
-            <AdminImageUploadField
+            const jsonRes = await res.json();
+
+            if (jsonRes.success) {
+                saved = true;
+            } else {
+                alert("Error Occured");
+            }
+        } catch (error) {
+            alert(error instanceof Error ? error.message : "Error Occured");
+        } finally {
+            saving = false;
+        }
+    }
+</script>
+
+<AdminPage
+    backHref="/Admin/Stories/"
+    title="Edit Story"
+    description="Select a story, then update its details, cover image and images."
+>
+{#if currentStory}
+    <div class="mt-6 flex flex-col gap-6">
+        <p class="text-sm font-medium text-gray-300">Select Story Entry</p>
+        <select
+            class="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-base text-gray-100"
+            onchange={(event) => {
+                const target = event.target as HTMLSelectElement;
+                const idx = Number(target.value);
+                currentStory = stories[idx];
+            }}
+        >
+            {#each stories as news, idx}
+                <option class="text-red-400" value={idx}>{news.title}</option>
+            {/each}
+        </select>
+
+        <form class="flex flex-col gap-6" onsubmit={handleSubmit}>
+            <AdminField label="Story Page URL" bind:value={currentStory.url} />
+            <AdminField label="Story Title" bind:value={currentStory.title} />
+
+            <AdminImageUploader
                 label="Cover Image"
                 value={currentStory.coverImage}
                 setValue={(nextValue) => {
                     currentStory.coverImage = nextValue;
                 }}
+                onChange={() => (saved = false)}
             />
-            <button type="submit">Update</button>
-        </div>
-        <div class="flex flex-col">
-            <h3>Images</h3>
-            {#each currentStory.images as image, index}
-                <div
-                    style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
-                >
-                    <AdminImageUploadField
-                        label="Image"
-                        value={image.src}
-                        setValue={(nextValue) => {
-                            image.src = nextValue;
-                        }}
-                    />
-                    <label>
-                        Alt:
-                        <input
-                            type="text"
-                            name={`images[${index}][alt]`}
-                            bind:value={image.alt}
-                        />
-                    </label>
-                    <label>
-                        Title:
-                        <input
-                            type="text"
-                            name={`images[${index}][title]`}
-                            bind:value={image.title}
-                        />
-                    </label>
-                    <button
-                        type="button"
-                        class="bg-red-500 rounded-lg p-1"
-                        onclick={() => removeImage(index)}>Remove</button
-                    >
-                </div>
-            {/each}
 
-            <button type="button" onclick={addImage}>+ Add Image</button>
-        </div>
-    </form>
-</div>
+            <h2 class="mt-8 text-lg font-medium">Images</h2>
+            <AdminImageGrid
+                images={currentStory.images}
+                onChange={() => (saved = false)}
+                showMeta
+                addLabel="+ Add image"
+            />
 
-<style>
-    label {
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: row;
-        height: 4em;
-        border-width: 1px;
-        border-color: gray;
-    }
-    button {
-        margin-top: 10px;
-    }
-    input {
-        width: 100%;
-    }
-</style>
+            <AdminSaveBar {saving} {saved} />
+        </form>
+    </div>
+{:else}
+    <div
+        class="mt-6 rounded-xl border border-dashed border-gray-700 bg-gray-900/60 p-10 text-center text-gray-400"
+    >
+        No stories yet. Create one from the
+        <a class="text-amber-300 underline" href="/Admin/Stories/Create"
+            >create page</a
+        >.
+    </div>
+{/if}
+</AdminPage>

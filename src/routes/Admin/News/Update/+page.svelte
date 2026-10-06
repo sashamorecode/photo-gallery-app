@@ -1,42 +1,27 @@
 <script lang="ts">
-    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+    import AdminField from "$lib/components/AdminField.svelte";
+    import AdminImageGrid from "$lib/components/AdminImageGrid.svelte";
+    import AdminImageUploader from "$lib/components/AdminImageUploader.svelte";
+    import AdminPage from "$lib/components/AdminPage.svelte";
+    import AdminSaveBar from "$lib/components/AdminSaveBar.svelte";
 
     let { data } = $props();
     let newsPosts = $state(data.news);
     let currentNews = $derived(newsPosts[0]);
-    function addImage(): void {
-        currentNews.images = [
-            ...currentNews.images,
-            { src: "", alt: "", title: "" },
-        ];
-    }
+    let saving = $state(false);
+    let saved = $state(false);
 
-    function removeImage(index: number): void {
-        currentNews.images = currentNews.images.filter(
-            (_: unknown, i: number) => i !== index,
-        );
-    }
-</script>
+    async function handleSubmit(event: SubmitEvent) {
+        event.preventDefault();
+        if (saving) {
+            return;
+        }
 
-<a href="/Admin/News/">BACK</a>
-<div class="bg-gray-800 mx-auto overflow-y-scroll">
-    <p>Select News Entry</p>
-    <select
-        class="text-white"
-        onchange={(event) => {
-            const target = event.target as HTMLSelectElement;
-            const idx = Number(target.value);
-            currentNews = newsPosts[idx];
-        }}
-    >
-        {#each newsPosts as news, idx}
-            <option class="text-red-400" value={idx}>{news.title}</option>
-        {/each}
-    </select>
-    <form
-        onsubmit={(e) => {
-            e.preventDefault();
-            const res = fetch(`/Admin/News/${currentNews.id}`, {
+        saving = true;
+        saved = false;
+
+        try {
+            const response = await fetch(`/Admin/News/${currentNews.id}`, {
                 method: "PUT",
                 headers: {
                     Accept: "application/json",
@@ -44,119 +29,87 @@
                 },
                 body: JSON.stringify(currentNews),
             });
-            res.then((r) => {
-                let jres = r.json();
-                jres.then((jsonRes) => {
-                    if (jsonRes.success) {
-                        alert("Updated Entry Sucessfully");
-                    } else {
-                        alert("Error Occured");
-                    }
-                });
-            });
-        }}
-        class="grid grid-cols-2 text-xl overflow-y-scroll"
-    >
-        <div class="flex flex-col">
-            <label>
-                News Page URL:
-                <input type="text" name="url" bind:value={currentNews.url} />
-            </label>
-            <label>
-                News Title:
-                <input
-                    type="text"
-                    name="title"
-                    bind:value={currentNews.title}
-                />
-            </label>
-            <AdminImageUploadField
-                label="Cover Image"
-                value={currentNews.coverImage}
-                setValue={(nextValue) => {
-                    currentNews.coverImage = nextValue;
-                }}
-            />
-            <label>
-                Date Of Publication:
-                <input
-                    type="text"
-                    placeholder="15 - Mar - 2021"
-                    name="date"
-                    bind:value={currentNews.date}
-                />
-            </label>
-            <label>
-                News Type:
-                <input
-                    type="text"
-                    name="newsType"
-                    bind:value={currentNews.newsType}
-                />
-            </label>
-            <label>
-                News Content:
-                <textarea name="content" bind:value={currentNews.content}
-                ></textarea>
-            </label>
-            <button type="submit">Update</button>
-        </div>
-        <div class="flex flex-col">
-            <h3>Images</h3>
-            {#each currentNews.images as image, index}
-                <div
-                    style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
-                >
-                    <AdminImageUploadField
-                        label="Image"
-                        value={image.src}
-                        setValue={(nextValue) => {
-                            image.src = nextValue;
-                        }}
-                    />
-                    <label>
-                        Alt:
-                        <input
-                            type="text"
-                            name={`images[${index}][alt]`}
-                            bind:value={image.alt}
-                        />
-                    </label>
-                    <label>
-                        Title:
-                        <input
-                            type="text"
-                            name={`images[${index}][title]`}
-                            bind:value={image.title}
-                        />
-                    </label>
-                    <button
-                        type="button"
-                        class="bg-red-500 rounded-lg p-1"
-                        onclick={() => removeImage(index)}>Remove</button
-                    >
-                </div>
+            const result = await response.json();
+
+            if (result.success) {
+                saved = true;
+            } else {
+                alert("Error Occured");
+            }
+        } catch (error) {
+            alert("Error Occured");
+        } finally {
+            saving = false;
+        }
+    }
+</script>
+
+<AdminPage
+    backHref="/Admin/News/"
+    title="Edit News Post"
+    description="Choose a post to edit, update its details and images, then save your changes."
+>
+{#if currentNews}
+    <div class="mt-6 flex flex-col gap-1.5">
+        <span class="text-sm font-medium text-gray-300">Select News Entry</span>
+        <select
+            class="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-base text-gray-100"
+            onchange={(event) => {
+                const target = event.target as HTMLSelectElement;
+                const idx = Number(target.value);
+                currentNews = newsPosts[idx];
+            }}
+        >
+            {#each newsPosts as news, idx}
+                <option value={idx}>{news.title}</option>
             {/each}
+        </select>
+    </div>
 
-            <button type="button" onclick={addImage}>+ Add Image</button>
-        </div>
+    <form onsubmit={handleSubmit} class="mt-6 flex flex-col gap-6">
+        <AdminField label="News Page URL" bind:value={currentNews.url} />
+        <AdminField label="News Title" bind:value={currentNews.title} />
+
+        <AdminImageUploader
+            label="Cover Image"
+            value={currentNews.coverImage}
+            setValue={(nextValue) => {
+                currentNews.coverImage = nextValue;
+            }}
+            onChange={() => (saved = false)}
+        />
+
+        <AdminField
+            label="Date Of Publication"
+            bind:value={currentNews.date}
+            placeholder="15 - Mar - 2021"
+        />
+        <AdminField label="News Type" bind:value={currentNews.newsType} />
+        <AdminField
+            label="News Content"
+            bind:value={currentNews.content}
+            multiline
+            rows={10}
+        />
+
+        <h2 class="mt-8 text-lg font-medium">Images</h2>
+        <AdminImageGrid
+            images={currentNews.images}
+            showMeta
+            addLabel="+ Add image"
+            onChange={() => (saved = false)}
+        />
+
+        <AdminSaveBar {saving} {saved} />
     </form>
-</div>
-
-<style>
-    label {
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: row;
-        height: 4em;
-        border-width: 1px;
-        border-color: gray;
-    }
-    button {
-        margin-top: 10px;
-    }
-    input,
-    textarea {
-        width: 100%;
-    }
-</style>
+{:else}
+    <div
+        class="mt-6 rounded-xl border border-dashed border-gray-700 bg-gray-900/60 p-10 text-center text-gray-400"
+    >
+        No news posts yet. Create one from the
+        <a class="text-amber-300 underline" href="/Admin/News/Create"
+            >create page</a
+        >.
+    </div>
+{/if}
+</AdminPage>

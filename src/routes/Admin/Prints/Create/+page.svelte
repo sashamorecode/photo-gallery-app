@@ -1,5 +1,8 @@
 <script lang="ts">
-    import AdminImageUploadField from "$lib/components/AdminImageUploadField.svelte";
+    import AdminField from "$lib/components/AdminField.svelte";
+    import AdminImageUploader from "$lib/components/AdminImageUploader.svelte";
+    import AdminPage from "$lib/components/AdminPage.svelte";
+    import AdminSaveBar from "$lib/components/AdminSaveBar.svelte";
 
     let currentPrint = $state({
         title: "",
@@ -16,10 +19,13 @@
     }
 </script>
 
-<a href="/Admin/Prints/">BACK</a>
-<div class="bg-gray-800 mx-auto overflow-y-scroll">
+<AdminPage
+    backHref="/Admin/Prints/"
+    title="Create Print"
+    description="Add a new print with a title, description, image, and pricing sizes."
+>
     <form
-        class="grid grid-cols-1 text-xl overflow-y-scroll"
+        class="mt-6 flex flex-col gap-6"
         onsubmit={(e) => {
             e.preventDefault();
             const res = fetch(`/Admin/Prints/Create`, {
@@ -47,71 +53,51 @@
             });
         }}
     >
-        <label>
-            Print Title:
-            <input type="text" name="title" bind:value={currentPrint.title} />
-        </label>
-        <label>
-            Print Description:
-            <input
-                type="text"
-                name="description"
-                bind:value={currentPrint.description}
-            />
-        </label>
+        <AdminField label="Print Title" bind:value={currentPrint.title} />
+        <AdminField
+            label="Print Description"
+            bind:value={currentPrint.description}
+        />
 
-        <AdminImageUploadField
+        <AdminImageUploader
             label="Print Image"
             value={currentPrint.src}
             setValue={(nextValue) => {
                 currentPrint.src = nextValue;
             }}
         />
-        <h3>Sizes</h3>
-        {#each currentPrint.sizes as { size, price }, index}
-            <div
-                style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"
-            >
-                <label>
-                    Size:
-                    <input
-                        type="text"
-                        name={`sizes${index}][size]`}
-                        bind:value={currentPrint.sizes[index].size}
-                    />
-                </label>
-                <label>
-                    Price:
-                    <input
-                        type="text"
-                        name={`sizes[${index}][price]`}
-                        bind:value={currentPrint.sizes[index].price}
-                    />
-                </label>
-                <button type="button" onclick={() => removeSize(index)}
-                    >Remove</button
+
+        <div class="flex flex-col gap-3">
+            <h3 class="text-lg font-medium text-gray-200">Sizes</h3>
+            {#each currentPrint.sizes as size, index}
+                <div
+                    class="flex flex-col gap-3 rounded-xl border border-gray-700 bg-gray-900 p-3 sm:flex-row sm:items-end"
                 >
-            </div>
-        {/each}
+                    <div class="min-w-0 flex-1">
+                        <AdminField label="Size" bind:value={size.size} />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <AdminField label="Price" bind:value={size.price} />
+                    </div>
+                    <button
+                        type="button"
+                        onclick={() => removeSize(index)}
+                        class="w-full shrink-0 whitespace-nowrap rounded-md bg-red-600 px-3 py-2 text-sm transition hover:bg-red-500 sm:w-auto"
+                    >
+                        Remove
+                    </button>
+                </div>
+            {/each}
 
-        <button type="button" onclick={addSize}>+ Add Size</button>
+            <button
+                type="button"
+                onclick={addSize}
+                class="w-full rounded-xl border border-dashed border-gray-600 py-3 text-gray-300 transition hover:border-gray-400 hover:text-white"
+            >
+                + Add Size
+            </button>
+        </div>
 
-        <button type="submit">Submit</button>
+        <AdminSaveBar label="Submit" />
     </form>
-</div>
-
-<style>
-    label {
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: row;
-        border-width: 1px;
-        border-color: gray;
-    }
-    button {
-        margin-top: 10px;
-    }
-    input {
-        width: 100%;
-    }
-</style>
+</AdminPage>

@@ -1,13 +1,12 @@
 <script lang="ts">
-    import AdminImageGrid from "$lib/components/AdminImageGrid.svelte";
+    import AdminField from "$lib/components/AdminField.svelte";
+    import AdminImageUploader from "$lib/components/AdminImageUploader.svelte";
     import AdminPage from "$lib/components/AdminPage.svelte";
     import AdminSaveBar from "$lib/components/AdminSaveBar.svelte";
 
-    type HomepageImage = { src: string };
-
     let { data } = $props();
 
-    let images = $state<HomepageImage[]>(data.images ?? []);
+    let bio = $state({ ...data.bio });
     let saving = $state(false);
     let saved = $state(false);
 
@@ -21,13 +20,13 @@
         saved = false;
 
         try {
-            const response = await fetch("/Admin/Homepage/", {
+            const response = await fetch("/Admin/Bio", {
                 method: "PUT",
                 headers: {
                     Accept: "application/json",
                     "Content-type": "application/json",
                 },
-                body: JSON.stringify(images),
+                body: JSON.stringify(bio),
             });
             const result = await response.json();
 
@@ -45,14 +44,27 @@
 </script>
 
 <AdminPage
-    backHref="/Admin/Homepage/"
-    title="Homepage Carousel"
-    description="Drag a card to reorder. Each number shows the position it will appear in on the homepage."
+    backHref="/Admin/"
+    title="Modify Bio"
+    description="Update the portrait and the biography text shown on the Bio page."
+    maxWidthClass="max-w-3xl"
 >
-    <form onsubmit={handleSubmit} class="mt-6">
-        <AdminImageGrid
-            images={images}
+    <form onsubmit={handleSubmit} class="mt-6 flex flex-col gap-6">
+        <AdminImageUploader
+            label="Portrait Image"
+            value={bio.image}
+            setValue={(nextValue) => {
+                bio.image = nextValue;
+            }}
             onChange={() => (saved = false)}
+        />
+
+        <AdminField
+            label="Biography Text"
+            bind:value={bio.text}
+            multiline
+            rows={10}
+            placeholder="Write the biography..."
         />
 
         <AdminSaveBar {saving} {saved} />
