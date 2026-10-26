@@ -38,7 +38,7 @@ The production server is authoritative for data. `mydb.sqlite` and `static/` are
 - App directory: `/home/photoapp/photo-gallery-app`.
 - Runtime: `@sveltejs/adapter-node` running `build/index.js` under systemd unit `photoapp.service`, listening on `127.0.0.1:3000`, `NODE_ENV=production`.
 - Reverse proxy: nginx site `/etc/nginx/sites-available/photoapp`, TLS via Let's Encrypt. Do not break the cert.
-- Node: version 22 via nvm. Secrets live in `/home/photoapp/photo-gallery-app/.env` (`PASSWORD`, `MAILUSER`, `MAILPASS`, `MAIL_API_KEY`, `UPLOADS_DIR`). The build reads `MAIL_API_KEY` and `PASSWORD` at compile time, so `.env` must exist before `npm run build`.
+- Node: version 22 via nvm, pinned to 22.23.4 or a later patched 22.x release. Secrets live in `/home/photoapp/photo-gallery-app/.env` (`PASSWORD`, `MAILUSER`, `MAILPASS`, `MAIL_API_KEY`, `UPLOADS_DIR`). The build reads `MAIL_API_KEY` and `PASSWORD` at compile time, so `.env` must exist before `npm run build`.
 
 `configServer.sh` is the full provisioning script. Do NOT run it wholesale on an existing server: it rewrites `.env` and the systemd unit, and it defaults the secrets to `CHANGE_ME`. Apply only the targeted steps below.
 
@@ -90,6 +90,31 @@ git log --oneline -5
 
 ## Step 3: install dependencies and build
 
+Install the pinned Node.js security release before rebuilding. Node.js 22.23.4 fixes [CVE-2026-111497](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases). Run these commands as `photoapp` from the app directory:
+
+```sh
+export NVM_DIR="$HOME/.nvm"
+. "$NVM_DIR/nvm.sh"
+nvm install
+nvm use
+nvm alias default "$(cat .nvmrc)"
+node --version
+```
+
+The service uses an absolute Node path. Update it with a systemd drop-in so the restart in Step 6 uses the patched runtime:
+
+```sh
+sudo mkdir -p /etc/systemd/system/photoapp.service.d
+sudo tee /etc/systemd/system/photoapp.service.d/node.conf > /dev/null <<EOF
+[Service]
+ExecStart=
+ExecStart=$(command -v node) /home/photoapp/photo-gallery-app/build/index.js
+EOF
+sudo systemctl daemon-reload
+```
+
+Reinstall dependencies under the selected runtime to rebuild native modules such as `better-sqlite3`:
+
 ```sh
 npm ci --prefer-offline
 npm run build
@@ -139,6 +164,15 @@ sudo journalctl -u photoapp -n 50 --no-pager
 ```
 
 ## Step 7: verify
+
+Check the executable used by the running service, rather than only the shell's Node version:
+
+```sh
+APP_PID=$(sudo systemctl show photoapp.service --property=MainPID --value)
+sudo /proc/"$APP_PID"/exe --version
+```
+
+Expect `v22.23.4` or a later patched 22.x release.
 
 ```sh
 # HTTP/2 and gzip on the HTML response
@@ -197,6 +231,18 @@ cd /home/photoapp/photo-gallery-app
 git rev-parse HEAD | tee /tmp/deploy-prev-commit.txt
 cp mydb.sqlite "mydb.sqlite.bak-$(date +%Y-%m-%d-%H%M)"
 git pull --ff-only origin main
+export NVM_DIR="$HOME/.nvm"
+. "$NVM_DIR/nvm.sh"
+nvm install
+nvm use
+nvm alias default "$(cat .nvmrc)"
+sudo mkdir -p /etc/systemd/system/photoapp.service.d
+sudo tee /etc/systemd/system/photoapp.service.d/node.conf > /dev/null <<EOF
+[Service]
+ExecStart=
+ExecStart=$(command -v node) /home/photoapp/photo-gallery-app/build/index.js
+EOF
+sudo systemctl daemon-reload
 npm ci --prefer-offline
 npm run build
 npm run images:variants

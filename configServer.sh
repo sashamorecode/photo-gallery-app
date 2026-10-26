@@ -22,7 +22,7 @@ APP_USER="photoapp"
 APP_DIR="/home/${APP_USER}/photo-gallery-app"
 DOMAIN="jonasschledorn.com"
 GIT_REPO="https://github.com/sashamorecode/photo-gallery-app.git"
-NODE_VERSION="22"
+NODE_VERSION="22.23.4"
 
 # Secrets — fill in real values or export them before running the script
 APP_PASSWORD="${APP_PASSWORD:-CHANGE_ME}"
@@ -63,19 +63,17 @@ install_system_deps() {
 # 2. Node.js via nvm
 # ---------------------------------------------------------------------------
 install_node() {
-  if command -v node &>/dev/null; then
-    ok "Node $(node --version) already installed — skipping."
-    return
+  export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+  if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+    info "Installing nvm..."
+    curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
   fi
 
-  info "Installing nvm + Node ${NODE_VERSION}..."
-  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh | bash
-
-  # Load nvm into the current shell
-  export NVM_DIR="$HOME/.nvm"
+  # Always select the patched runtime, even when another Node version exists.
   # shellcheck source=/dev/null
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  \. "$NVM_DIR/nvm.sh"
 
+  info "Installing and selecting Node ${NODE_VERSION}..."
   nvm install "${NODE_VERSION}"
   nvm use "${NODE_VERSION}"
   nvm alias default "${NODE_VERSION}"

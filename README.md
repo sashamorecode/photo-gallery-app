@@ -62,6 +62,15 @@ Both values are kept in sync automatically when using `configServer.sh` (edit `M
 
 ## 🛠️ Development
 
+Use the pinned Node.js version before installing dependencies:
+
+```sh
+nvm install
+nvm use
+```
+
+The project pins Node.js 22.23.4 to fix [CVE-2026-111497](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases). The package engine range also permits patched Node.js 24 and 26 releases. For an existing server, follow the Node upgrade steps in [DEPLOY_HANDOFF.md](DEPLOY_HANDOFF.md#step-3-install-dependencies-and-build). The systemd service uses an absolute Node path, so changing nvm's default alone does not upgrade the running app.
+
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
 ```sh
